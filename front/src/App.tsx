@@ -1,6 +1,7 @@
-import React from 'react'
+import { FC } from 'react';
 import JOIAPEDROcopy from './assets/JOIAPEDROcopy.png'
-function App() {
+
+const App: FC = () => {
   return (
     <div className='flex flex-col items-center justify-center h-screen'>
       <h1>
@@ -11,4 +12,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
