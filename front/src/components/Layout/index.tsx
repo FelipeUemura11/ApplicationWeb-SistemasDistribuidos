@@ -1,8 +1,21 @@
 import { FC} from 'react';
-// vai ter um children que vai ser o conteudo da pagina
-const Layout: FC = () =>  {
+import Header from '../Header';
+import Footer from '../Footer';
+
+
+interface LayoutProps{
+  children: React.ReactNode;
+}
+
+const Layout: FC<LayoutProps> = ({children}) =>  {
   return (
-    <div>Layout</div>
+    <div>
+      <Header/>
+      <main>
+        {children}
+      </main>
+      <Footer/>
+    </div>
   )
 }
 

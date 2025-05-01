@@ -2,7 +2,9 @@ import { FC } from 'react';
 
 const NotFound: FC = () => {
   return (
-    <div>NotFound</div>
+    <div>
+      <h1>NotFound</h1>
+    </div>
   )
 }
 

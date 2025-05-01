@@ -1,13 +1,16 @@
 import { FC } from 'react';
-import JOIAPEDROcopy from './assets/JOIAPEDROcopy.png'
+import { BrowserRouter } from 'react-router-dom';
+import Layout from './components/Layout';
+import AppRoutes from './routes';
 
 const App: FC = () => {
   return (
-    <div className='flex flex-col items-center justify-center h-screen'>
-      <h1>
-        Hello World! projetinho fellas!
-      </h1>
-      <img src={JOIAPEDROcopy} alt="JOIAPEDROcopy" />
+    <div>
+      <BrowserRouter>
+        <Layout>
+          <AppRoutes />
+        </Layout>
+      </BrowserRouter>
     </div>
   )
 }
