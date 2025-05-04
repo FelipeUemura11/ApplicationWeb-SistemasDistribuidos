@@ -4,10 +4,10 @@ import { ValidacaoTarefa } from '../middlewares/ValidacaoTarefa.js';
 
 const router = express.Router();
 // app.js utiliza /tarefa como prefixo dos endpoints
-router.post('/adicionar', ValidacaoTarefa,TarefaController.criarTarefa);
-router.get('/listar', TarefaController.listarTarefas);
-router.get('/buscar/:id', TarefaController.buscarTarefa);
-router.put('/atualizar/:id', TarefaController.atualizarTarefa);
-router.delete('/deletar/:id', TarefaController.deletarTarefa);
+router.post('/', ValidacaoTarefa,TarefaController.criarTarefa);
+router.get('/', TarefaController.listarTarefas);
+router.get('/:id', TarefaController.buscarTarefa);
+router.put('/:id', TarefaController.atualizarTarefa);
+router.delete('/:id', TarefaController.deletarTarefa);
 
 export default router;

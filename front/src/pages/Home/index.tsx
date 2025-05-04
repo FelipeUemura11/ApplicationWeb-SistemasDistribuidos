@@ -1,46 +1,26 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 const Home: FC = () => {
   return (
-    <div className="space-y-8">
-      <section className="text-center py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Bem-vindo
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Uma plataforma moderna
-        </p>
-      </section>
-
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Recursos
-          </h3>
-          <p className="text-gray-600">
-            Explore nossos recursos incríveis
-          </p>
+    <section className="flex justify-center items-center min-h-screen px-4 py-6 relative overflow-hidden">
+      <div
+                className="text-center p-6 rounded-lg"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.7))',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+                  position: 'relative',
+                }}
+      
+      >
+        <h2 className="text-3xl font-bold text-white mb-6"> Bem-vindo ao App </h2>
+        <div className="flex flex-col space-y-3">
+          <Link to="/tarefa" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Criar Tarefa</Link>
+          <Link to="/about" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Sobre o App</Link>
+          <Link to="*" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">NotFound</Link>
         </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Serviços
-          </h3>
-          <p className="text-gray-600">
-            Conheça nossos serviços
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Contato
-          </h3>
-          <p className="text-gray-600">
-            Entre em contato conosco
-          </p>
-        </div>
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 

@@ -9,21 +9,21 @@ const Header: FC = () => {
             <li>
               <Link
                   to="/"
-                  className="text-white hover:text-green-200 transition-colors font-medium">
+                  className="text-white hover:text-blue-200 transition-colors font-medium">
                   Home
               </Link>
             </li>
             <li>
               <Link
                   to="/about"
-                  className="text-white hover:text-green-200 transition-colors font-medium">
+                  className="text-white hover:text-blue-200 transition-colors font-medium">
                   About
               </Link>
             </li>
             <li>
               <Link
                   to="*"
-                  className="text-white hover:text-green-200 transition-colors font-medium">
+                  className="text-white hover:text-blue-200 transition-colors font-medium">
                   NotFound
               </Link>
             </li>
