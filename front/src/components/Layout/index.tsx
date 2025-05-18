@@ -9,7 +9,7 @@ interface LayoutProps{
 
 const Layout: FC<LayoutProps> = ({children}) =>  {
   return (
-    <div>
+    <div className='bg-[#0F172A] min-h-screen'>
       <Header/>
       <main>
         {children}
