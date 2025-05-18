@@ -1,38 +1,55 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
+import CollabFlowLogo from '../Icon/CollabFlowLogo';
+import useScrollDirection from '../../hooks/useScrollDirection';
+
 const Header: FC = () => {
+  const scrollDirection = useScrollDirection();
+
   return (
-    <header className="bg-[#3B82F6] shadow-lg">
-      <nav className="container mx-auto px-5 py-5">
-        <div className="flex items-center justify-between">
-          <ul className="flex space-x-10">
-            <li>
-              <Link
-                  to="/"
-                  className="text-[#F8FAFC] hover:text-blue-100 transition-colors font-medium">
-                  Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                  to="/about"
-                  className="text-[#F8FAFC] hover:text-blue-100 transition-colors font-medium">
-                  About
-              </Link>
-            </li>
-            <li>
-              <Link
-                  to="*"
-                  className="text-[#F8FAFC] hover:text-blue-100 transition-colors font-medium">
-                  NotFound
-              </Link>
-            </li>
-            
-          </ul>
+    <header
+      className={`fixed top-0 left-0 w-full z-50 bg-[#1E293B] shadow-md transition-transform duration-300 ${
+        scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'
+      }`}
+    >
+      <nav className="container mx-auto px-6 py-2 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center space-x-2">
+            <CollabFlowLogo />
+          </Link>
         </div>
+
+        {/* Navegação */}
+        <ul className="flex space-x-8 text-sm font-medium">
+          <li>
+            <Link
+              to="/"
+              className="text-blue-100 hover:text-blue-400 transition-colors"
+            >
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/about"
+              className="text-blue-100 hover:text-blue-400 transition-colors"
+            >
+              About
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="*"
+              className="text-blue-100 hover:text-blue-400 transition-colors"
+            >
+              NotFound
+            </Link>
+          </li>
+        </ul>
       </nav>
     </header>
-  )
-}
+  );
+};
 
 export default Header;

@@ -1,7 +1,7 @@
 const CollabFlowLogo = () => {
   return (
     <svg
-      className="w-56 h-14"
+      className="h-20"
       viewBox="0 0 400 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
