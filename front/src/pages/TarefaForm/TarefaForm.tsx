@@ -42,21 +42,21 @@ const TarefaForm: React.FC<TarefaFormProps> = ({ onTarefaAdicionada }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-                <label className="block text-sm font-medium text-gray-700">Título</label>
+                <label className="block text-sm font-medium text-[#F8FAFC]">Título</label>
                 <input
                     type="text"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm outline-none"
                     required
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Descrição</label>
+                <label className="block text-sm font-medium text-[#F8FAFC]">Descrição</label>
                 <textarea
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm outline-none"
                     rows={3}
                 />
             </div>
