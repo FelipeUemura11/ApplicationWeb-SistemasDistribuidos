@@ -68,7 +68,7 @@ const Footer: FC = () => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                felipe@gmail.com
+                collabflow@gmail.com
               </p>
               <p className="flex items-center text-sm">
                 <svg
@@ -92,7 +92,7 @@ const Footer: FC = () => {
 
         {/* Copyright */}
         <div className="border-t border-gray-700 mt-4 pt-4 text-center text-gray-400 text-sm">
-          <p>&copy; 2025 Meu Site. Todos os direitos reservados...</p>
+          <p>&copy; 2025 CollabFlow. Todos os direitos reservados...</p>
         </div>
       </div>
     </footer>
