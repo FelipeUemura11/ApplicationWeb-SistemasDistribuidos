@@ -12,7 +12,7 @@ const Header: FC = () => {
         scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      <nav className="container mx-auto px-10 py-2 flex items-center justify-between">
+      <nav className="container mx-auto px-10 py-1.5 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
