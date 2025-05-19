@@ -12,7 +12,7 @@ const Header: FC = () => {
         scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      <nav className="container mx-auto px-6 py-2 flex items-center justify-between">
+      <nav className="container mx-auto px-10 py-2 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
@@ -40,10 +40,10 @@ const Header: FC = () => {
           </li>
           <li>
             <Link
-              to="*"
+              to="/my-account"
               className="text-blue-100 hover:text-blue-400 transition-colors"
             >
-              NotFound
+              My Account
             </Link>
           </li>
         </ul>
