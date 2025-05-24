@@ -1,10 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function Chat() {
   const [messages, setMessages] = useState([
     { id: 1, text: "Olá! Como posso ajudar?", sender: "bot" },
   ]);
   const [input, setInput] = useState("");
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -25,7 +36,36 @@ export default function Chat() {
 
   return (
     <div className="w-2/5 min-w-[260px] max-w-2xl border-r border-blue-800 p-4 flex flex-col flex-grow bg-[#0F172A]">
-      <div className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 h-[calc(100vh-200px)] max-h-[400px] bg-[#0F172A] rounded p-2 overflow-y-auto text-blue-200 scroll-smooth custom-scrollbar"
+        style={{ 
+          scrollBehavior: 'smooth',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#3B82F6 #1E293B'
+        }}
+      >
+        <style>
+          {`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 8px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #1E293B;
+              border-radius: 4px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #3B82F6;
+              border-radius: 4px;
+            }
+            
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #2563EB;
+            }
+          `}
+        </style>
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-2 mb-2">
             <div

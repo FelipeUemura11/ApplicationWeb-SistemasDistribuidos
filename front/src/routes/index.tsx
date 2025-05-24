@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import About from '../pages/About';
 import Home from '../pages/Home';
 import NotFound from '../pages/NotFound';
-import Tarefa from '../pages/TarefaPage/TarefaPage.tsx';
+import Tarefa from '../components/TarefaPage/TarefaPage.tsx';
 import MyAccount from '../pages/MyAccount/index.tsx';
 import LoginPage from '../pages/LoginPage/index.tsx';
 
