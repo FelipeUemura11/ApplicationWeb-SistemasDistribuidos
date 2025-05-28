@@ -24,7 +24,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-full md:w-2/5 min-w-[260px] min-h-[500px] md:max-w-2xl md:border-r mb-5 border-t border-b md:border-t-0 md:border-b-0 border-blue-800 py-8 flex flex-col flex-grow bg-[#0F172A]">
+    <div className="w-full md:w-2/5 min-w-[260px] h-[578px] md:max-w-2xl md:border-r mb-5 border-t border-b md:border-t-0 md:border-b-0 border-blue-800 py-8 md:p-4 flex flex-col flex-grow bg-[#0F172A] overflow-y-auto custom-scrollbar">
       <div className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200">
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-2 mb-2">
