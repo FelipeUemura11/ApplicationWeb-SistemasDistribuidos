@@ -35,37 +35,8 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-2/5 min-w-[260px] max-w-2xl border-r border-blue-800 p-4 flex flex-col flex-grow bg-[#0F172A]">
-      <div 
-        ref={messagesContainerRef}
-        className="flex-1 h-[calc(100vh-200px)] max-h-[400px] bg-[#0F172A] rounded p-2 overflow-y-auto text-blue-200 scroll-smooth custom-scrollbar"
-        style={{ 
-          scrollBehavior: 'smooth',
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#3B82F6 #1E293B'
-        }}
-      >
-        <style>
-          {`
-            .custom-scrollbar::-webkit-scrollbar {
-              width: 8px;
-            }
-            
-            .custom-scrollbar::-webkit-scrollbar-track {
-              background: #1E293B;
-              border-radius: 4px;
-            }
-            
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-              background: #3B82F6;
-              border-radius: 4px;
-            }
-            
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: #2563EB;
-            }
-          `}
-        </style>
+    <div className="w-full md:w-2/5 min-w-[260px] h-[578px] md:max-w-2xl md:border-r mb-5 border-t border-b md:border-t-0 md:border-b-0 border-blue-800 py-8 md:p-4 flex flex-col flex-grow bg-[#0F172A] overflow-y-auto custom-scrollbar">
+      <div className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200">
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-2 mb-2">
             <div
