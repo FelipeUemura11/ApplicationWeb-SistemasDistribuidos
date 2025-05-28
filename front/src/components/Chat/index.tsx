@@ -1,10 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function Chat() {
   const [messages, setMessages] = useState([
     { id: 1, text: "Olá! Como posso ajudar?", sender: "bot" },
   ]);
   const [input, setInput] = useState("");
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
