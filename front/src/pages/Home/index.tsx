@@ -1,22 +1,17 @@
 import { FC } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { format, parse, startOfWeek, getDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import "./calendar.css";
 import Grupos from "../../components/Grupos";
 import Chat from "../../components/Chat";
+import Calendario from "../../components/Calendario";
 
 // Fazer npm install com big-calendar e date-fns, caso necessário;
 
-const locales = { "pt-BR": ptBR };
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
+
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ const handleSelectSlot = (slotInfo: { start: Date; end: Date; slots: Date[] }) => {
+    // This is now just a pass-through since the state is managed in Calendario
+  };
 
 const events = [
   {
@@ -37,18 +32,7 @@ const HomePage: FC = () => {
         <div className="w-full md:w-2/5 mx-auto min-w-[260px] max-w-xl p-4 flex flex-col bg-[#0F172A]">
           <h2 className="font-bold text-lg mb-2 text-blue-200">Calendário</h2>
           <div className="flex-1 justify-center items-center min-h-[400px] bg-[#0F172A] rounded-lg p-2">
-            <Calendar
-              className="calendar-dark"
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              style={{
-                height: "100%",
-                background: "transparent",
-                color: "#e0e7ef",
-              }}
-            />
+            <Calendario onSelectSlot={handleSelectSlot} events={events} />
           </div>
         </div>
       </div>
