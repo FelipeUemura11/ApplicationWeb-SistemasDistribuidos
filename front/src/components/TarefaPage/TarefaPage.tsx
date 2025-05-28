@@ -46,9 +46,9 @@ const TarefaPage: FC<TarefaPageProps> = ({ selectedDate, onClose }) => {
     <div
       className="h-full w-full overflow-y-auto custom-scrollbar"
       style={{
-        scrollBehavior: 'smooth',
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#1E40AF #1E293B'
+        scrollBehavior: "smooth",
+        scrollbarWidth: "thin",
+        scrollbarColor: "#1E40AF #1E293B",
       }}
     >
       <style>
@@ -71,9 +71,9 @@ const TarefaPage: FC<TarefaPageProps> = ({ selectedDate, onClose }) => {
       </style>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-blue-400">
-          Tarefas para {selectedDate.toLocaleDateString('pt-BR')}
+          Tarefas para {selectedDate.toLocaleDateString("pt-BR")}
         </h1>
-        <button 
+        <button
           onClick={onClose}
           className="text-blue-200 hover:text-blue-400 transition-colors"
         >

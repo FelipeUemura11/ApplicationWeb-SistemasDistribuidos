@@ -1,6 +1,6 @@
 export default function Grupos() {
   return (
-    <div className="w-full md:w-1/5 min-w-[180px] max-w-xs py-4 flex-shrink-0 flex flex-col items-center md:items-start bg-[#0F172A] md:border-r border-blue-800 shadow-md md:bg-transparent md:shadow-none mx-auto md:mx-0">
+    <div className="w-full h-full md:w-1/5 min-w-[180px] max-w-xs py-4 flex-shrink-0 flex flex-col items-center md:items-start bg-[#0F172A] md:border-r border-blue-800 shadow-md md:bg-transparent md:shadow-none mx-auto md:mx-0">
       <h2 className="font-bold text-lg text-blue-200 px-4 mb-4 w-full text-center md:text-left">
         Grupos
       </h2>
