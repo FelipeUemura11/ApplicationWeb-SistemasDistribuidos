@@ -51,7 +51,7 @@ const Calendario: FC<CalendarioProps> = ({ onSelectSlot, events = [] }) => {
         endAccessor="end"
         onSelectSlot={handleSelectSlot}
         style={{
-          height: "578px", 
+          height: "500px", 
           background: "transparent",
           color: "#e0e7ef",
         }}
