@@ -15,7 +15,6 @@ app.use(cors({
 app.use(express.json());
 app.use('/tarefa', TarefaRoutes);
 
-// Rotas de teste
 app.get('/', (req, res) => {
     res.json({
         message: 'INICIANDO API DE TAREFAS'

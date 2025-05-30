@@ -3,7 +3,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import "./calendar.css";
+import "../../components/Calendario/calendar.css";
 import Grupos from "../../components/Grupos";
 import Chat from "../../components/Chat";
 
