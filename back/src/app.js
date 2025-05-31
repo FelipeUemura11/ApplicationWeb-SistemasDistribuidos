@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import TarefaRoutes from './routes/TarefaRoutes.js';
+import UsuarioRoutes from './routes/usuarioRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 3777;
+const PORT = process.env.PORT || 3000;
 
 // Configuração do CORS para conexao com o frontend(5173)
 app.use(cors({
@@ -14,6 +15,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use('/tarefa', TarefaRoutes);
+app.use('/usuario', UsuarioRoutes);
 
 app.get('/', (req, res) => {
     res.json({

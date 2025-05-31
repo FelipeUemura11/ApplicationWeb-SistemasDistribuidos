@@ -1,9 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import fs from 'fs/promises';
+import path from 'path';
+
+const DB_PATH = path.join(process.cwd(), 'src', 'data', 'usuarios.json');
 
 class UsuarioController {
     constructor(){
         this.usuarios = [];
+        this.carregarUsuarios();
         this.cadastrarUsuario = this.cadastrarUsuario.bind(this);
         this.listarUsuarios = this.listarUsuarios.bind(this);
         this.buscarUsuario = this.buscarUsuario.bind(this);
@@ -12,24 +17,25 @@ class UsuarioController {
         this.login = this.login.bind(this);
     }
 
-    validarForcaSenha(senha) {
-        const temMinimoCaracteres = senha.length >= 8;
-        const temLetraMaiuscula = /[A-Z]/.test(senha);
-        const temLetraMinuscula = /[a-z]/.test(senha);
-        const temNumero = /[0-9]/.test(senha);
-        const temCaractereEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+    async carregarUsuarios() {
+        try {
+            const data = await fs.readFile(DB_PATH, 'utf-8');
+            this.usuarios = JSON.parse(data);
+        } catch (error) {
+            // Se o arquivo não existir, cria um array vazio
+            this.usuarios = [];
+            await this.salvarUsuarios();
+        }
+    }
 
-        const erros = [];
-        if (!temMinimoCaracteres) erros.push('A senha deve ter pelo menos 8 caracteres');
-        if (!temLetraMaiuscula) erros.push('A senha deve conter pelo menos uma letra maiúscula');
-        if (!temLetraMinuscula) erros.push('A senha deve conter pelo menos uma letra minúscula');
-        if (!temNumero) erros.push('A senha deve conter pelo menos um número');
-        if (!temCaractereEspecial) erros.push('A senha deve conter pelo menos um caractere especial');
-
-        return {
-            valida: erros.length === 0,
-            erros
-        };
+    async salvarUsuarios() {
+        try {
+            // Garante que o diretório existe
+            await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
+            await fs.writeFile(DB_PATH, JSON.stringify(this.usuarios, null, 2));
+        } catch (error) {
+            console.error('Erro ao salvar usuários:', error);
+        }
     }
 
     async login(req, res) {
@@ -92,14 +98,6 @@ class UsuarioController {
                 });
             }
 
-            const validacaoSenha = this.validarForcaSenha(senha);
-            if (!validacaoSenha.valida) {
-                return res.status(400).json({
-                    error: 'Senha inválida',
-                    detalhes: validacaoSenha.erros
-                });
-            }
-
             const emailExistente = this.usuarios.find(u => u.email === email);
             if(emailExistente) {
                 return res.status(400).json({
@@ -117,6 +115,7 @@ class UsuarioController {
             };
 
             this.usuarios.push(novoUsuario);
+            await this.salvarUsuarios();
 
             // Gera o token JWT após o cadastro
             const token = jwt.sign(
@@ -194,6 +193,7 @@ class UsuarioController {
             };
 
             this.usuarios[usuarioIndex] = attUsuario;
+            await this.salvarUsuarios();
             return res.status(200).json(attUsuario);
         }catch(error){
             console.error('Erro ao atualizar usuário:', error);
@@ -213,6 +213,7 @@ class UsuarioController {
                 });
             }
             this.usuarios.splice(usuarioIndex, 1);
+            await this.salvarUsuarios();
             return res.status(200).json({
                 message: 'Usuário deletado com sucesso'
             });
