@@ -44,38 +44,15 @@ const TarefaPage: FC<TarefaPageProps> = ({ selectedDate, onClose }) => {
 
   return (
     <div
-      className="h-full w-full overflow-y-auto custom-scrollbar"
-      style={{
-        scrollBehavior: "smooth",
-        scrollbarWidth: "thin",
-        scrollbarColor: "#1E40AF #1E293B",
-      }}
+      className="h-full w-full overflow-y-auto custom-scrollbar pr-2"
     >
-      <style>
-        {`
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1E293B;
-            border-radius: 3px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #3B82F6;
-            border-radius: 3px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #2563EB;
-          }
-        `}
-      </style>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-blue-400">
           Tarefas para {selectedDate.toLocaleDateString("pt-BR")}
         </h1>
         <button
           onClick={onClose}
-          className="text-blue-200 hover:text-blue-400 transition-colors"
+          className="text-blue-200 hover:text-blue-400 transition-colors cursor-pointer"
         >
           ✕
         </button>
