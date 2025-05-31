@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import CollabFlowLogo from "../Icon/CollabFlowLogo";
 import useScrollDirection from "../../hooks/useScrollDirection";
+import { FiLogOut } from "react-icons/fi";
+
 
 const Header: FC = () => {
   const scrollDirection = useScrollDirection();
@@ -114,7 +116,16 @@ const Header: FC = () => {
             </Link>
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-blue-800 text-sm text-blue-500">
+          <Link
+              to="/login-register"
+              className="text-blue-100 hover:text-blue-400 mt-auto flex items-center"
+              onClick={() => setMenuOpen(false)}
+            >
+              <FiLogOut size={20} className="inline mr-2" />
+              Logout
+            </Link>
+
+          <div className=" pt-6 border-t border-blue-800 text-sm text-blue-500">
             © 2025 CollabFlow
           </div>
 
