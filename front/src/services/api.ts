@@ -2,8 +2,37 @@ import axios from 'axios';
 import Tarefa from '../types/Tarefa';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3777'
+    baseURL: 'http://localhost:3000',
 });
+
+// Add a request interceptor to add the token to all requests
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Add a response interceptor to handle token expiration
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Clear local storage and redirect to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login-register';
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Define objeto TarefaService para gereniar as requisições da API
 export const TarefaService = {
     // Função para listar todas as tarefas
@@ -57,3 +86,5 @@ export const TarefaService = {
         };
     }
 };
+
+export default api;

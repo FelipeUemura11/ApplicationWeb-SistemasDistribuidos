@@ -1,5 +1,10 @@
 import { FC } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import { FiLogOut } from "react-icons/fi";
+import "../../components/Calendario/calendar.css";
 import "./calendar.css";
 import Grupos from "../../components/Grupos";
 import Chat from "../../components/Chat";
@@ -22,9 +27,27 @@ const events = [
 ];
 
 const HomePage: FC = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   return (
     <section className="flex justify-center items-center w-full min-h-[calc(100vh-120px)] pt-40 pb-8 px-2 bg-gradient-to-br from-[#0F172A] to-[#1E293B]">
       <div className="w-full max-w-7xl rounded-2xl shadow-2xl bg-[#0F172A] border border-blue-800 flex flex-col md:flex-row overflow-hidden min-h-[600px] px-4 text-blue-100">
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
+          >
+            <FiLogOut size={20} />
+            Sair
+          </button>
+        </div>
+
         <Grupos />
 
         <Chat />

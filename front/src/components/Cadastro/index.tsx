@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 import Divider from "../LoginPageComponents/Divider";
 import LoginInput from "../LoginPageComponents/LoginInput";
@@ -15,6 +17,7 @@ export default function Cadastro({
   setIsLogin: (value: boolean) => void;
   setLoading: (value: boolean) => void;
 }) {
+  const navigate = useNavigate();
   const [bgImage, setBgImage] = useState(BackgroundImage);
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +39,7 @@ export default function Cadastro({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  function cadastrarUsuario(e: React.FormEvent) {
+  async function cadastrarUsuario(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
@@ -56,7 +59,21 @@ export default function Cadastro({
       return;
     }
 
-    setTimeout(() => {
+    try {
+      console.log('Tentando cadastrar usuário:', { nome: nomeCompleto, email, senha });
+      
+      const response = await api.post('/usuario/cadastrar', {
+        nome: nomeCompleto,
+        email,
+        senha
+      });
+
+      console.log('Resposta do servidor:', response.data);
+
+      // não perder os dados caso o usuario feche o navegador e abra novamente
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.usuario));
+
       Swal.fire({
         icon: "success",
         title: "Cadastro realizado com sucesso!",
@@ -68,14 +85,34 @@ export default function Cadastro({
           }
         },
       });
+
+
+      navigate('/');
+    } catch (error: any) {
+      console.error('Erro ao cadastrar:', error);
+      console.error('Detalhes do erro:', error.response?.data);
+      
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao cadastrar",
+        text: error.response?.data?.error || "Ocorreu um erro ao tentar cadastrar",
+        didOpen: () => {
+          const swalPopup = document.querySelector(".swal2-popup");
+          if (swalPopup) {
+            (swalPopup as HTMLElement).style.zIndex = "9999";
+          }
+        },
+      });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   }
 
   return (
+    <div className="w-full h-full bg-[#0F172A]">
     <div
       id="formulario"
-      className="min-h-screen h-full w-full overflow-y-scroll"
+      className="min-h-screen h-full w-full flex justify-center items-center overflow-y-scroll"
       style={{
         scrollbarWidth: "none", // Firefox
         msOverflowStyle: "none", // IE/Edge
@@ -90,7 +127,7 @@ export default function Cadastro({
       }
     `}
       </style>
-      <div className="w-[95%] md:w-[70%] rounded-lg bg-[#0F172A] h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
+      <div className="w-[25%] md:w-[25%] bg-blue-800 rounded-lg p-6 md:p-10 mx-auto flex flex-col transition-opacity duration-500 shadow-lg">
         <h1 className="text-center text-gray-300 text-[30px] font-medium mb-[10px]">
           Cadastro
         </h1>
@@ -155,6 +192,7 @@ export default function Cadastro({
           Voltar ao Login
         </button>
       </div>
+    </div>
     </div>
   );
 }
