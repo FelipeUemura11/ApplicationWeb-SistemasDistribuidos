@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import About from '../pages/About';
 import Home from '../pages/Home';
 import NotFound from '../pages/NotFound';

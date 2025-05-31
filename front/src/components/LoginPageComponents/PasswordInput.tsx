@@ -20,7 +20,7 @@ const PasswordInput = ({ esqueciSenha, label, value, onChange }: PasswordInputPr
       <div className="relative w-full">
         <label
           htmlFor={idCampo}
-          className={`absolute bg-blue-800 text-gray-300 transition-all duration-300 bg-[#0F172A] px-2 ${
+          className={`absolute text-gray-300 transition-all duration-300 bg-[#0F172A] px-2 ${
             isFocused || value
               ? "top-[-10px] left-2 text-[14px]"
               : "top-1/2 transform left-3 -translate-y-1/2 text-base text-[16px]"

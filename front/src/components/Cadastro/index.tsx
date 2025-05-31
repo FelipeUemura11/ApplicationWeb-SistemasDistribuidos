@@ -60,19 +60,23 @@ export default function Cadastro({
     }
 
     try {
-      console.log('Tentando cadastrar usuário:', { nome: nomeCompleto, email, senha });
-      
-      const response = await api.post('/usuario/cadastrar', {
+      console.log("Tentando cadastrar usuário:", {
         nome: nomeCompleto,
         email,
-        senha
+        senha,
       });
 
-      console.log('Resposta do servidor:', response.data);
+      const response = await api.post("/usuario/cadastrar", {
+        nome: nomeCompleto,
+        email,
+        senha,
+      });
+
+      console.log("Resposta do servidor:", response.data);
 
       // não perder os dados caso o usuario feche o navegador e abra novamente
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.usuario));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.usuario));
 
       Swal.fire({
         icon: "success",
@@ -86,16 +90,16 @@ export default function Cadastro({
         },
       });
 
-
-      navigate('/');
+      navigate("/");
     } catch (error: any) {
-      console.error('Erro ao cadastrar:', error);
-      console.error('Detalhes do erro:', error.response?.data);
-      
+      console.error("Erro ao cadastrar:", error);
+      console.error("Detalhes do erro:", error.response?.data);
+
       Swal.fire({
         icon: "error",
         title: "Erro ao cadastrar",
-        text: error.response?.data?.error || "Ocorreu um erro ao tentar cadastrar",
+        text:
+          error.response?.data?.error || "Ocorreu um erro ao tentar cadastrar",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
           if (swalPopup) {
@@ -109,10 +113,9 @@ export default function Cadastro({
   }
 
   return (
-    <div className="w-full h-full bg-[#0F172A]">
     <div
       id="formulario"
-      className="min-h-screen h-full w-full flex justify-center items-center overflow-y-scroll"
+      className="min-h-screen h-full w-full overflow-y-scroll"
       style={{
         scrollbarWidth: "none", // Firefox
         msOverflowStyle: "none", // IE/Edge
@@ -127,8 +130,8 @@ export default function Cadastro({
       }
     `}
       </style>
-      <div className="w-[25%] md:w-[25%] bg-blue-800 rounded-lg p-6 md:p-10 mx-auto flex flex-col transition-opacity duration-500 shadow-lg">
-        <h1 className="text-center text-gray-300 text-[30px] font-medium mb-[10px]">
+      <div className="w-[95%] md:w-[70%] rounded-lg bg-[#0F172A] h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
+        <h1 className="text-center text-gray-300 text-[30px] font-medium mb-[10px] pt-6">
           Cadastro
         </h1>
         <p className="text-gray-300 mt-[20px] font-medium text-[14px]">
@@ -192,7 +195,6 @@ export default function Cadastro({
           Voltar ao Login
         </button>
       </div>
-    </div>
     </div>
   );
 }

@@ -41,18 +41,18 @@ export default function Login({
     setLoading(true);
 
     try {
-      console.log('Tentando fazer login:', { email, senha });
-      
-      const response = await api.post('/usuario/login', {
+      console.log("Tentando fazer login:", { email, senha });
+
+      const response = await api.post("/usuario/login", {
         email,
-        senha
+        senha,
       });
 
-      console.log('Resposta do servidor:', response.data);
+      console.log("Resposta do servidor:", response.data);
 
       // não perder os dados caso o usuario feche o navegador e abra novamente
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.usuario));
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.usuario));
 
       Swal.fire({
         icon: "success",
@@ -66,16 +66,18 @@ export default function Login({
         },
       }).then(() => {
         // redirecionar para a pagina home após o alerta
-        navigate('/Home');
+        navigate("/Home");
       });
     } catch (error: any) {
-      console.error('Erro ao fazer login:', error);
-      console.error('Detalhes do erro:', error.response?.data);
-      
+      console.error("Erro ao fazer login:", error);
+      console.error("Detalhes do erro:", error.response?.data);
+
       Swal.fire({
         icon: "error",
         title: "Erro ao fazer login",
-        text: error.response?.data?.error || "Ocorreu um erro ao tentar fazer login",
+        text:
+          error.response?.data?.error ||
+          "Ocorreu um erro ao tentar fazer login",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
           if (swalPopup) {
@@ -89,51 +91,50 @@ export default function Login({
   }
 
   return (
-    <div className="w-full h-full bg-[#0F172A]">
-      <div
-        id="formulario"
-        className="min-h-screen h-full w-full flex justify-center items-center overflow-y-auto scrollbar-hide"
-        style={{
-          backgroundImage: bgImage ? `url(${bgImage})` : "none",
-          scrollbarWidth: "none", // Firefox
-          msOverflowStyle: "none", // Edge
-        }}
-      >
-        <div className="w-[25%] md:w-[25%] bg-blue-800 rounded-lg p-6 md:p-10 mx-auto flex flex-col transition-opacity duration-500 shadow-lg">
-          <h1 className="text-center text-[30px] font-semibold mb-6 text-white">Login</h1>
-  
-          <div className="flex flex-col mb-6">
-            <LoginInput
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-  
-          <div className="flex flex-col mb-5">
-            <PasswordInput
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              esqueciSenha={false}
-              label="Senha"
-            />
-          </div>
-  
-          <button
-            onClick={loginUsuario}
-            className="cursor-pointer bg-[#3B82F6] hover:bg-[#1E40AF] w-full h-[45px] rounded-md text-white font-medium text-[17px] transition-all duration-200 mb-4"
-          >
-            Entrar
-          </button>
-  
-          <Divider texto="Ou Crie sua Conta" />
-  
-          <button
-            className="cursor-pointer bg-[#dadada] w-full h-[45px] rounded-md text-[#333] font-medium text-[17px] transition-all duration-200 mt-3"
-            onClick={() => setIsLogin(false)}
-          >
-            Cadastro
-          </button>
+    <div
+      id="formulario"
+      className="min-h-screen h-[100%] overflow-y-auto scrollbar-hide w-[100%] pt-6"
+      style={{
+        backgroundImage: bgImage ? `url(${bgImage})` : "none",
+        scrollbarWidth: "none", // Firefox
+        msOverflowStyle: "none", // Edge
+      }}
+    >
+      <div className="w-[95%] md:w-[70%] bg-[#0F172A]  rounded-lg h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
+        <h1 className="text-center text-[30px] font-medium mb-[10px] text-gray-300">
+          Login
+        </h1>
+        <p className="text-gray-300 mt-[20px] text-[14px] font-medium">
+          Acesse sua conta e comece a colaborar com sua equipe em tempo real,
+          com organização, agilidade e segurança.
+        </p>
+        <div className="flex flex-col mb-[30px] mt-[30px]">
+          <LoginInput
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
+        <div className="flex flex-col mb-[20px]">
+          <PasswordInput
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            esqueciSenha={false}
+            label="Senha"
+          />
+        </div>
+        <button
+          onClick={loginUsuario}
+          className="cursor-pointer bg-[#3B82F6] hover:bg-[#1E40AF] w-full h-[45px] rounded-md text-white font-medium mt-[20px] text-[17px] transition-all duration-200 hover:opacity-80 mb-[10px]"
+        >
+          Entrar
+        </button>
+        <Divider texto="Ou Crie sua Conta" />
+        <button
+          className="cursor-pointer bg-[#dadada] w-full h-[45px] rounded-md text-[#333] font-medium text-[17px] transition-all duration-200 hover:opacity-80 mt-[10px]"
+          onClick={() => setIsLogin(false)}
+        >
+          Cadastro
+        </button>
       </div>
     </div>
   );

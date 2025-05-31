@@ -1,25 +1,57 @@
 import { useState } from "react";
-import Login from "../../components/Login";
-import Cadastro from "../../components/Cadastro";
+
+import LoadingModal from "../../components/LoadingModal/index.tsx";
+
+import loginImage from "../../assets/images/loginPage.jpg";
+import cadastroImage from "../../assets/images/loginPage.jpg";
+import Login from "../../components/Login/index";
+import Cadastro from "../../components/Cadastro/index.tsx";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0F172A]">
-      {isLogin ? (
-        <Login setIsLogin={setIsLogin} setLoading={setLoading} />
-      ) : (
+    <div className="relative flex h-screen w-full overflow-x-hidden ">
+      <LoadingModal visible={loading} />
+      {/* Área do Formulário - Sempre à Esquerda */}
+      <div
+        className={`relative w-full md:w-1/2 flex justify-center transition-transform duration-700 ${
+          isLogin ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Formulário de Login */}
+        {isLogin && <Login setIsLogin={setIsLogin} setLoading={setLoading} />}
+      </div>
+
+      {/* Imagem - Sempre Movendo Conforme o Estado */}
+      <div
+        className={`hidden md:block relative w-1/2 h-full transition-transform duration-700 ${
+          isLogin ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div
+          className={`absolute inset-0 ${
+            isLogin ? "bg-gradient-to-r" : "bg-gradient-to-l"
+          } from-[#0F172A] to-transparent opacity-100`}
+        ></div>
+        <img
+          src={isLogin ? loginImage : cadastroImage}
+          alt="Imagem"
+          className={`w-full h-full object-cover object-top`}
+        />
+      </div>
+
+      {/* Formulário de Cadastro - Sempre à Direita */}
+      <div
+        className={`absolute top-0 right-0  w-full md:w-1/2 h-full flex justify-center transition-transform duration-700 ${
+          isLogin
+            ? "translate-x-full opacity-0 pointer-events-none"
+            : "translate-x-0 opacity-100"
+        }`}
+      >
         <Cadastro setIsLogin={setIsLogin} setLoading={setLoading} />
-      )}
-      
-      {/* Loading overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
