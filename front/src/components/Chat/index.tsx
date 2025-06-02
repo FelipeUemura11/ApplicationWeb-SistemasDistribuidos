@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { serverTimestamp } from "firebase/database";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
+import { db } from "../../services/firebase";
+
 interface Message {
   id: string;
   text: string;
@@ -22,7 +24,8 @@ export default function Chat({ chatId }: ChatProps) {
 
   useEffect(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -59,15 +62,18 @@ export default function Chat({ chatId }: ChatProps) {
 
   if (!chatId) {
     return (
-      <div className="w-full md:w-2/5 min-w-[260px] h-full flex items-center justify-center bg-[#0F172A] text-blue-400">
-        Selecione um chat para começar a conversar.
+      <div className="w-full md:w-2/5 min-w-[260px] h-[578px] flex items-center justify-center bg-[#0F172A] text-blue-400">
+        <p className="mx-auto flex text-center"> Selecione um chat para começar a conversar.</p>
       </div>
     );
   }
 
   return (
     <div className="w-full md:w-2/5 min-w-[260px] h-[578px] md:max-w-2xl md:border-r mb-5 border-t border-b md:border-t-0 md:border-b-0 border-blue-800 px-4 py-8 md:p-4 md:py-0 flex flex-col flex-grow bg-[#0F172A] overflow-y-auto custom-scrollbar">
-      <div ref={messagesContainerRef} className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200"
+      >
         {messages.map((msg) => (
           <div key={msg.id} className="flex gap-2 mb-2">
             <div
