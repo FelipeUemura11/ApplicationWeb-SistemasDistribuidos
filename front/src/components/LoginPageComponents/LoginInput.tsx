@@ -28,7 +28,7 @@ export default function LoginInput({onChange, value}: LoginInputProps) {
         id="email"
         name="email"
         type="email"
-        className="w-full border text-[#555] border-gray-300 rounded-lg py-3 px-4 pr-10 transition-all duration-300 focus:outline-none focus:ring-1 focus:ring-[#1E40AF] focus:border-[#1E40AF]"
+        className="w-full border text-gray-300 border-gray-300 rounded-lg py-3 px-4 pr-10 transition-all duration-300 focus:outline-none focus:ring-1 focus:ring-[#1E40AF] focus:border-[#1E40AF]"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         onChange={onChange}

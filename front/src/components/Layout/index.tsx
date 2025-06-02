@@ -10,7 +10,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <div className='bg-[#0F172A] min-h-screen flex flex-col'>
       <Header />
-      <main className="flex-grow pt-[130px]">
+      <main className="flex-grow">
         {children}
       </main>
       <Footer />
