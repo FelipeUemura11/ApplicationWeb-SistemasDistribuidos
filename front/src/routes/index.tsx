@@ -11,23 +11,16 @@ import PrivateRoute from '../components/PrivateRoute';
 const AppRoutes: FC = () => {
   return (
     <Routes>
-      {/* Rota raiz - sempre mostra login/registro */}
       <Route path="/" element={<LoginPage />} />
-      
-      {/* Rota de login/cadastro */}
       <Route path="/login-register" element={<LoginPage />} />
-      
-      {/* Rota principal após login */}
       <Route path="/home" element={
         <PrivateRoute>
           <Home />
         </PrivateRoute>
       } />
-      
-      {/* Rotas protegidas */}
       <Route path="/tarefa" element={
         <PrivateRoute>
-          <Tarefa selectedDate={new Date()} onClose={() => {}} />
+          <Tarefa selectedDate={new Date()} onClose={() => { console.log('Fechando Tarefa via PrivateRoute wrapper'); }} />
         </PrivateRoute>
       } />
       <Route path="/about" element={
@@ -40,8 +33,6 @@ const AppRoutes: FC = () => {
           <MyAccount />
         </PrivateRoute>
       } />
-      
-      {/* Rota 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

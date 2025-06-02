@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import { useAuth } from "../../context/authContext";
+import { AuthError, User as FirebaseAuthUser, UserCredential } from "firebase/auth";
+import { upsertUserInDatabase } from "../../services/userService";
 
 import Divider from "../LoginPageComponents/Divider";
 import LoginInput from "../LoginPageComponents/LoginInput";
 import PasswordInput from "../LoginPageComponents/PasswordInput";
-
 import BackgroundImage from "../../assets/images/loginPage.jpg";
 
 export default function Login({
@@ -17,6 +18,7 @@ export default function Login({
   setLoading: (value: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [bgImage, setBgImage] = useState(BackgroundImage);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -29,10 +31,8 @@ export default function Login({
         setBgImage(BackgroundImage);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -41,48 +41,54 @@ export default function Login({
     setLoading(true);
 
     try {
-      console.log("Tentando fazer login:", { email, senha });
-
-      const response = await api.post("/usuario/login", {
-        email,
-        senha,
-      });
-
-      console.log("Resposta do servidor:", response.data);
-
-      // não perder os dados caso o usuario feche o navegador e abra novamente
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.usuario));
-
-      Swal.fire({
-        icon: "success",
-        title: "Login realizado com sucesso!",
-        text: "Bem-vindo de volta!",
-        didOpen: () => {
-          const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) {
-            (swalPopup as HTMLElement).style.zIndex = "9999";
-          }
-        },
-      }).then(() => {
-        // redirecionar para a pagina home após o alerta
-        navigate("/Home");
-      });
+      const result = await signIn(email, senha);
+      if ((result as UserCredential).user) {
+        const userCredential = result as UserCredential;
+        const firebaseUser: FirebaseAuthUser = userCredential.user;
+        console.log("Usuário logado com sucesso via Auth:", firebaseUser.uid);
+        await upsertUserInDatabase(firebaseUser);
+        console.log("Dados do usuário (login) sincronizados/verificados no Realtime Database.");
+        Swal.fire({
+          icon: "success",
+          title: "Login realizado com sucesso!",
+          text: "Bem-vindo de volta!",
+          didOpen: () => {
+            const swalPopup = document.querySelector(".swal2-popup");
+            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          },
+        }).then(() => {
+          navigate("/Home");
+        });
+      } else {
+        const firebaseError = result as AuthError;
+        console.error("Erro ao fazer login (Firebase Auth):", firebaseError);
+        let errorMessage = "E-mail ou senha inválidos.";
+        if (firebaseError.code === 'auth/user-not-found' || 
+            firebaseError.code === 'auth/wrong-password' || 
+            firebaseError.code === 'auth/invalid-credential') {
+          errorMessage = 'E-mail ou senha inválidos.';
+        } else if (firebaseError.code === 'auth/too-many-requests') {
+          errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+        }
+        Swal.fire({
+          icon: "error",
+          title: "Erro ao fazer login",
+          text: errorMessage,
+          didOpen: () => {
+            const swalPopup = document.querySelector(".swal2-popup");
+            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          },
+        });
+      }
     } catch (error: any) {
-      console.error("Erro ao fazer login:", error);
-      console.error("Detalhes do erro:", error.response?.data);
-
+      console.error("Erro geral no processo de login:", error);
       Swal.fire({
         icon: "error",
-        title: "Erro ao fazer login",
-        text:
-          error.response?.data?.error ||
-          "Ocorreu um erro ao tentar fazer login",
+        title: "Erro Inesperado",
+        text: "Ocorreu um erro inesperado durante o login. Tente novamente.",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) {
-            (swalPopup as HTMLElement).style.zIndex = "9999";
-          }
+          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
         },
       });
     } finally {
@@ -96,8 +102,8 @@ export default function Login({
       className="min-h-screen h-[100%] overflow-y-auto scrollbar-hide w-[100%] pt-6"
       style={{
         backgroundImage: bgImage ? `url(${bgImage})` : "none",
-        scrollbarWidth: "none", // Firefox
-        msOverflowStyle: "none", // Edge
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
       }}
     >
       <div className="w-[95%] md:w-[70%] bg-[#0F172A]  rounded-lg h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">

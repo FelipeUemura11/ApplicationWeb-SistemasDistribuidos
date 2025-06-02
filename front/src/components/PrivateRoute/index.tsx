@@ -1,16 +1,22 @@
+import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from "../../context/authContext";
+import LoadingModal from '../LoadingModal';
 
 interface PrivateRouteProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
-// impedir que o usuario acesse a pagina home sem estar autenticado
 export default function PrivateRoute({ children }: PrivateRouteProps) {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
+  const { currentUser, loadingAuth } = useAuth();
+
+  if (loadingAuth) {
+    return <LoadingModal visible={true} message="Verificando sessão..." />;
+  }
+
+  if (!currentUser) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
-} 
+}

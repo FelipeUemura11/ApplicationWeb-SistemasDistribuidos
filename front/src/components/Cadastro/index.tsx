@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import { useAuth } from "../../context/authContext";
+import { AuthError, User as FirebaseAuthUser, UserCredential } from "firebase/auth";
+import { upsertUserInDatabase } from "../../services/userService";
 
 import Divider from "../LoginPageComponents/Divider";
 import LoginInput from "../LoginPageComponents/LoginInput";
 import PasswordInput from "../LoginPageComponents/PasswordInput";
 import RegisterInput from "../LoginPageComponents/RegisterInput";
-
 import BackgroundImage from "../../assets/images/loginPage.jpg";
 
 export default function Cadastro({
@@ -18,6 +19,7 @@ export default function Cadastro({
   setLoading: (value: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const { signUp, updateUserProfile } = useAuth();
   const [bgImage, setBgImage] = useState(BackgroundImage);
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [email, setEmail] = useState("");
@@ -32,10 +34,8 @@ export default function Cadastro({
         setBgImage(BackgroundImage);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -50,9 +50,7 @@ export default function Cadastro({
         text: "As senhas não coincidem!",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) {
-            (swalPopup as HTMLElement).style.zIndex = "9999";
-          }
+          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
         },
       });
       setLoading(false);
@@ -60,51 +58,57 @@ export default function Cadastro({
     }
 
     try {
-      console.log("Tentando cadastrar usuário:", {
-        nome: nomeCompleto,
-        email,
-        senha,
-      });
-
-      const response = await api.post("/usuario/cadastrar", {
-        nome: nomeCompleto,
-        email,
-        senha,
-      });
-
-      console.log("Resposta do servidor:", response.data);
-
-      // não perder os dados caso o usuario feche o navegador e abra novamente
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.usuario));
-
-      Swal.fire({
-        icon: "success",
-        title: "Cadastro realizado com sucesso!",
-        text: "Você já pode fazer login.",
-        didOpen: () => {
-          const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) {
-            (swalPopup as HTMLElement).style.zIndex = "9999";
-          }
-        },
-      });
-
-      navigate("/");
+      const result = await signUp(email, senha);
+      if ((result as UserCredential).user) {
+        const userCredential = result as UserCredential;
+        const firebaseUser: FirebaseAuthUser = userCredential.user;
+        await updateUserProfile({ displayName: nomeCompleto });
+        console.log("Usuário cadastrado e perfil Auth atualizado:", firebaseUser.displayName);
+        await updateUserProfile({ displayName: nomeCompleto });
+        console.log("Usuário cadastrado e perfil Auth atualizado:", firebaseUser.displayName);
+        await upsertUserInDatabase(firebaseUser, { displayName: nomeCompleto });
+        console.log("Dados do usuário (cadastro) salvos/atualizados no Realtime Database.");
+        await upsertUserInDatabase(firebaseUser, { displayName: nomeCompleto });
+        console.log("Dados do usuário salvos/atualizados no Realtime Database.");
+        Swal.fire({
+          icon: "success",
+          title: "Cadastro realizado com sucesso!",
+          text: "Você será redirecionado.",
+          didOpen: () => {
+            const swalPopup = document.querySelector(".swal2-popup");
+            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          },
+        }).then(() => {
+          navigate("/home");
+        });
+      } else {
+        const firebaseError = result as AuthError;
+        console.error("Erro ao cadastrar (Firebase Auth):", firebaseError);
+        let errorMessage = "Ocorreu um erro ao tentar cadastrar.";
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          errorMessage = 'Este e-mail já está em uso.';
+        } else if (firebaseError.code === 'auth/weak-password') {
+          errorMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+        }
+        Swal.fire({
+          icon: "error",
+          title: "Erro ao cadastrar",
+          text: errorMessage,
+          didOpen: () => {
+            const swalPopup = document.querySelector(".swal2-popup");
+            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          },
+        });
+      }
     } catch (error: any) {
-      console.error("Erro ao cadastrar:", error);
-      console.error("Detalhes do erro:", error.response?.data);
-
+      console.error("Erro geral no processo de cadastro:", error);
       Swal.fire({
         icon: "error",
-        title: "Erro ao cadastrar",
-        text:
-          error.response?.data?.error || "Ocorreu um erro ao tentar cadastrar",
+        title: "Erro Inesperado",
+        text: "Ocorreu um erro inesperado durante o cadastro. Tente novamente.",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) {
-            (swalPopup as HTMLElement).style.zIndex = "9999";
-          }
+          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
         },
       });
     } finally {
@@ -117,12 +121,11 @@ export default function Cadastro({
       id="formulario"
       className="min-h-screen h-full w-full overflow-y-scroll"
       style={{
-        scrollbarWidth: "none", // Firefox
-        msOverflowStyle: "none", // IE/Edge
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
         backgroundImage: bgImage ? `url(${bgImage})` : "none",
       }}
     >
-      {/* conteúdo */}
       <style>
         {`
       #formulario::-webkit-scrollbar {
