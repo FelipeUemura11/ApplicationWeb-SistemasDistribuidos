@@ -23,20 +23,13 @@ function generateUserCode(): string {
 }
 
 async function isUserCodeUnique(userCode: string): Promise<boolean> {
-  const usersRef = ref(db, "users");
-  const snapshot = await get(usersRef);
-
-  if (!snapshot.exists()) return true;
-
-  const usersData = snapshot.val();
-  return !Object.values(usersData).some(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (user: any) => user.userCode === userCode
-  );
+  const codeRef = ref(db, `userCodes/${userCode}`);
+  const snapshot = await get(codeRef);
+  return !snapshot.exists(); // true se ainda não existe
 }
 
 async function generateUniqueUserCode(): Promise<string> {
-  let code;
+  let code = "";
   let unique = false;
 
   while (!unique) {
@@ -44,7 +37,7 @@ async function generateUniqueUserCode(): Promise<string> {
     unique = await isUserCodeUnique(code);
   }
 
-  return code!;
+  return code;
 }
 
 export async function upsertUserInDatabase(
@@ -80,17 +73,22 @@ export async function upsertUserInDatabase(
       currentPhotoURLInDb ||
       null;
 
-    const userCode =
-      additionalData.userCode ||
-      snapshot.val()?.userCode ||
-      (await generateUniqueUserCode());
+    let userCode = additionalData.userCode || snapshot.val()?.userCode || null;
+
+    const isNewUser = !snapshot.exists();
+
+    if (!userCode && isNewUser) {
+      userCode = await generateUniqueUserCode();
+      const userCodeRef = ref(db, `userCodes/${userCode}`);
+      await set(userCodeRef, firebaseUser.uid); // Grava o código único no nó userCodes
+    }
 
     const userDataForUpdate: Partial<UserProfile> = {
       uid: firebaseUser.uid,
-      displayName: displayName,
+      displayName,
       email: firebaseUser.email,
-      photoURL: photoURL,
-      userCode: userCode,
+      photoURL,
+      userCode,
     };
 
     if (snapshot.exists()) {
@@ -113,9 +111,8 @@ export async function upsertUserInDatabase(
 export async function getUserFromDatabase(
   userId: string
 ): Promise<UserProfile | null> {
-  if (!userId) {
-    return null;
-  }
+  if (!userId) return null;
+
   const userRef = ref(db, `users/${userId}`);
   try {
     const snapshot = await get(userRef);
