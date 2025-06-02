@@ -15,7 +15,7 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
   }
 
   if (!currentUser) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login-register" replace />;
   }
 
   return <>{children}</>;

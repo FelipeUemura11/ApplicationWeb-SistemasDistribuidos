@@ -86,15 +86,15 @@ const Header: FC = () => {
                     My Account
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
+                    className="flex items-center cursor-pointer gap-1 px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
                   >
                     <FiLogOut size={16} />
                     Sair
                   </button>
-                </li>
+                </li> */}
               </>
             )}
             {!currentUser && (

@@ -12,7 +12,7 @@ export interface UserProfile {
 
 export async function upsertUserInDatabase(
   firebaseUser: FirebaseAuthUser,
-  additionalData: Partial<Pick<UserProfile, 'displayName' | 'photoURL'>> = {}
+  additionalData: Partial<Pick<UserProfile, "displayName" | "photoURL">> = {}
 ): Promise<void> {
   if (!firebaseUser?.uid) {
     throw new Error("UID do usuário é inválido para salvar no banco de dados.");
@@ -23,11 +23,23 @@ export async function upsertUserInDatabase(
   try {
     const snapshot = await get(userRef);
 
-    const currentDisplayNameInDb = snapshot.exists() ? snapshot.val().displayName : null;
-    const displayName = additionalData.displayName || firebaseUser.displayName || currentDisplayNameInDb || 'Usuário Anônimo';
+    const currentDisplayNameInDb = snapshot.exists()
+      ? snapshot.val().displayName
+      : null;
+    const displayName =
+      additionalData.displayName ||
+      firebaseUser.displayName ||
+      currentDisplayNameInDb ||
+      "Usuário Anônimo";
 
-    const currentPhotoURLInDb = snapshot.exists() ? snapshot.val().photoURL : null;
-    const photoURL = additionalData.photoURL || firebaseUser.photoURL || currentPhotoURLInDb || null;
+    const currentPhotoURLInDb = snapshot.exists()
+      ? snapshot.val().photoURL
+      : null;
+    const photoURL =
+      additionalData.photoURL ||
+      firebaseUser.photoURL ||
+      currentPhotoURLInDb ||
+      null;
 
     const userDataForUpdate: Partial<UserProfile> = {
       uid: firebaseUser.uid,
@@ -45,12 +57,17 @@ export async function upsertUserInDatabase(
       });
     }
   } catch (error) {
-    console.error("Erro ao salvar/atualizar usuário no Realtime Database:", error);
+    console.error(
+      "Erro ao salvar/atualizar usuário no Realtime Database:",
+      error
+    );
     throw error;
   }
 }
 
-export async function getUserFromDatabase(userId: string): Promise<UserProfile | null> {
+export async function getUserFromDatabase(
+  userId: string
+): Promise<UserProfile | null> {
   if (!userId) {
     return null;
   }
