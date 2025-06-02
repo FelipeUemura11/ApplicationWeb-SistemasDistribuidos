@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-import { AuthError, User as FirebaseAuthUser, UserCredential } from "firebase/auth";
+import {
+  AuthError,
+  User as FirebaseAuthUser,
+  UserCredential,
+} from "firebase/auth";
 import { upsertUserInDatabase } from "../../services/userService";
 
 import Divider from "../LoginPageComponents/Divider";
@@ -47,14 +51,20 @@ export default function Login({
         const firebaseUser: FirebaseAuthUser = userCredential.user;
         console.log("Usuário logado com sucesso via Auth:", firebaseUser.uid);
         await upsertUserInDatabase(firebaseUser);
-        console.log("Dados do usuário (login) sincronizados/verificados no Realtime Database.");
+        console.log(
+          "Dados do usuário (login) sincronizados/verificados no Realtime Database."
+        );
         Swal.fire({
+          background: "#1E293B",
+          color: "#E0E7FF",
           icon: "success",
           title: "Login realizado com sucesso!",
           text: "Bem-vindo de volta!",
           didOpen: () => {
             const swalPopup = document.querySelector(".swal2-popup");
-            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+            if (swalPopup) {
+              (swalPopup as HTMLElement).style.zIndex = "9999";
+            }
           },
         }).then(() => {
           navigate("/");
@@ -63,33 +73,44 @@ export default function Login({
         const firebaseError = result as AuthError;
         console.error("Erro ao fazer login (Firebase Auth):", firebaseError);
         let errorMessage = "E-mail ou senha inválidos.";
-        if (firebaseError.code === 'auth/user-not-found' || 
-            firebaseError.code === 'auth/wrong-password' || 
-            firebaseError.code === 'auth/invalid-credential') {
-          errorMessage = 'E-mail ou senha inválidos.';
-        } else if (firebaseError.code === 'auth/too-many-requests') {
-          errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+        if (
+          firebaseError.code === "auth/user-not-found" ||
+          firebaseError.code === "auth/wrong-password" ||
+          firebaseError.code === "auth/invalid-credential"
+        ) {
+          errorMessage = "E-mail ou senha inválidos.";
+        } else if (firebaseError.code === "auth/too-many-requests") {
+          errorMessage =
+            "Muitas tentativas de login. Tente novamente mais tarde.";
         }
         Swal.fire({
+          background: "#1E293B",
+          color: "#E0E7FF",
           icon: "error",
           title: "Erro ao fazer login",
           text: errorMessage,
           didOpen: () => {
             const swalPopup = document.querySelector(".swal2-popup");
-            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+            if (swalPopup) {
+              (swalPopup as HTMLElement).style.zIndex = "9999";
+            }
           },
         });
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Erro geral no processo de login:", error);
       Swal.fire({
+        background: "#1E293B",
+        color: "#E0E7FF",
         icon: "error",
         title: "Erro Inesperado",
         text: "Ocorreu um erro inesperado durante o login. Tente novamente.",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          if (swalPopup) {
+            (swalPopup as HTMLElement).style.zIndex = "9999";
+          }
         },
       });
     } finally {

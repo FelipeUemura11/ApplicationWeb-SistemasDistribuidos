@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-import { AuthError, User as FirebaseAuthUser, UserCredential } from "firebase/auth";
+import {
+  AuthError,
+  User as FirebaseAuthUser,
+  UserCredential,
+} from "firebase/auth";
 import { upsertUserInDatabase } from "../../services/userService";
 
 import Divider from "../LoginPageComponents/Divider";
@@ -45,12 +49,16 @@ export default function Cadastro({
 
     if (senha !== confirmarSenha) {
       Swal.fire({
+        background: "#1E293B",
+        color: "#E0E7FF",
         icon: "error",
         title: "Oops...",
         text: "As senhas não coincidem!",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          if (swalPopup) {
+            (swalPopup as HTMLElement).style.zIndex = "9999";
+          }
         },
       });
       setLoading(false);
@@ -63,20 +71,34 @@ export default function Cadastro({
         const userCredential = result as UserCredential;
         const firebaseUser: FirebaseAuthUser = userCredential.user;
         await updateUserProfile({ displayName: nomeCompleto });
-        console.log("Usuário cadastrado e perfil Auth atualizado:", firebaseUser.displayName);
+        console.log(
+          "Usuário cadastrado e perfil Auth atualizado:",
+          firebaseUser.displayName
+        );
         await updateUserProfile({ displayName: nomeCompleto });
-        console.log("Usuário cadastrado e perfil Auth atualizado:", firebaseUser.displayName);
+        console.log(
+          "Usuário cadastrado e perfil Auth atualizado:",
+          firebaseUser.displayName
+        );
         await upsertUserInDatabase(firebaseUser, { displayName: nomeCompleto });
-        console.log("Dados do usuário (cadastro) salvos/atualizados no Realtime Database.");
+        console.log(
+          "Dados do usuário (cadastro) salvos/atualizados no Realtime Database."
+        );
         await upsertUserInDatabase(firebaseUser, { displayName: nomeCompleto });
-        console.log("Dados do usuário salvos/atualizados no Realtime Database.");
+        console.log(
+          "Dados do usuário salvos/atualizados no Realtime Database."
+        );
         Swal.fire({
+          background: "#1E293B",
+          color: "#E0E7FF",
           icon: "success",
           title: "Cadastro realizado com sucesso!",
           text: "Você será redirecionado.",
           didOpen: () => {
             const swalPopup = document.querySelector(".swal2-popup");
-            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+            if (swalPopup) {
+              (swalPopup as HTMLElement).style.zIndex = "9999";
+            }
           },
         }).then(() => {
           navigate("/");
@@ -85,30 +107,39 @@ export default function Cadastro({
         const firebaseError = result as AuthError;
         console.error("Erro ao cadastrar (Firebase Auth):", firebaseError);
         let errorMessage = "Ocorreu um erro ao tentar cadastrar.";
-        if (firebaseError.code === 'auth/email-already-in-use') {
-          errorMessage = 'Este e-mail já está em uso.';
-        } else if (firebaseError.code === 'auth/weak-password') {
-          errorMessage = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+        if (firebaseError.code === "auth/email-already-in-use") {
+          errorMessage = "Este e-mail já está em uso.";
+        } else if (firebaseError.code === "auth/weak-password") {
+          errorMessage = "A senha é muito fraca. Use pelo menos 6 caracteres.";
         }
         Swal.fire({
+          background: "#1E293B",
+          color: "#E0E7FF",
           icon: "error",
           title: "Erro ao cadastrar",
           text: errorMessage,
           didOpen: () => {
             const swalPopup = document.querySelector(".swal2-popup");
-            if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+            if (swalPopup) {
+              (swalPopup as HTMLElement).style.zIndex = "9999";
+            }
           },
         });
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Erro geral no processo de cadastro:", error);
       Swal.fire({
+        background: "#1E293B",
+        color: "#E0E7FF",
         icon: "error",
         title: "Erro Inesperado",
         text: "Ocorreu um erro inesperado durante o cadastro. Tente novamente.",
         didOpen: () => {
           const swalPopup = document.querySelector(".swal2-popup");
-          if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
+          if (swalPopup) {
+            (swalPopup as HTMLElement).style.zIndex = "9999";
+          }
         },
       });
     } finally {

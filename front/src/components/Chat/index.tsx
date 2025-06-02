@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { serverTimestamp } from "firebase/database";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
-import { db } from "../../services/firebase";
 
 interface Message {
   id: string;
