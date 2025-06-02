@@ -6,8 +6,10 @@ import {
   FaCopy,
   FaUserPlus,
 } from "react-icons/fa";
+import { useAuth } from "../../context/authContext";
 
 const MyAccount: FC = () => {
+  const { currentUser } = useAuth();
   const userCode = "CFX-8429";
   const [copied, setCopied] = useState(false);
 
@@ -22,12 +24,20 @@ const MyAccount: FC = () => {
       <div className="bg-[#1E293B] border border-blue-800 text-center text-blue-100 p-8 rounded-2xl shadow-xl w-full max-w-md">
         {/* Avatar */}
         <div className="flex justify-center mb-4">
-          <FaUserCircle className="text-blue-500" size={80} />
+          {currentUser?.photoURL ? (
+            <img
+              src={currentUser.photoURL}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full border-4 border-blue-700 shadow-lg"
+            />
+          ) : (
+            <FaUserCircle className="text-blue-500" size={80} />
+          )}
         </div>
 
         {/* Nome e email */}
-        <h2 className="text-2xl font-semibold mb-1">Test User</h2>
-        <p className="text-blue-300 text-sm mb-4">user@collabflow.com</p>
+        <h2 className="text-2xl font-semibold mb-1">{currentUser?.displayName}</h2>
+        <p className="text-blue-300 text-sm mb-4">{currentUser?.email}</p>
 
         {/* Código do usuário */}
         <div className="bg-[#0F172A] border border-blue-700 rounded-lg p-3 mb-6 flex items-center justify-between">
