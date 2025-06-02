@@ -57,7 +57,7 @@ export default function Login({
             if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
           },
         }).then(() => {
-          navigate("/Home");
+          navigate("/");
         });
       } else {
         const firebaseError = result as AuthError;
@@ -80,6 +80,7 @@ export default function Login({
           },
         });
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Erro geral no processo de login:", error);
       Swal.fire({

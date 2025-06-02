@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { serverTimestamp } from "firebase/database";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
-import { db } from "../../services/firebase";
-
 interface Message {
   id: string;
   text: string;
@@ -61,7 +59,7 @@ export default function Chat({ chatId }: ChatProps) {
 
   if (!chatId) {
     return (
-      <div className="w-full md:w-2/5 min-w-[260px] h-[578px] ... flex items-center justify-center bg-[#0F172A] text-blue-400">
+      <div className="w-full md:w-2/5 min-w-[260px] h-full flex items-center justify-center bg-[#0F172A] text-blue-400">
         Selecione um chat para começar a conversar.
       </div>
     );

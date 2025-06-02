@@ -79,7 +79,7 @@ export default function Cadastro({
             if (swalPopup) { (swalPopup as HTMLElement).style.zIndex = "9999"; }
           },
         }).then(() => {
-          navigate("/home");
+          navigate("/");
         });
       } else {
         const firebaseError = result as AuthError;

@@ -6,15 +6,45 @@ import {
   FaCopy,
   FaUserPlus,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../context/authContext";
+import Swal from "sweetalert2";
 
 const MyAccount: FC = () => {
-  const userCode = "CFX-8429";
+  const { currentUser, logOut: firebaseLogout } = useAuth();
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(userCode);
+    navigator.clipboard.writeText(currentUser?.userCode || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await firebaseLogout();
+      Swal.fire({
+        icon: "success",
+        title: "Logout realizado!",
+        text: "Você foi desconectado com sucesso.",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#1E293B",
+        color: "#E0E7FF",
+      });
+      navigate("/login-register");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Erro",
+        text: "Não foi possível fazer logout.",
+        background: "#1E293B",
+        color: "#E0E7FF",
+      });
+    }
   };
 
   return (
@@ -22,16 +52,26 @@ const MyAccount: FC = () => {
       <div className="bg-[#1E293B] border border-blue-800 text-center text-blue-100 p-8 rounded-2xl shadow-xl w-full max-w-md">
         {/* Avatar */}
         <div className="flex justify-center mb-4">
-          <FaUserCircle className="text-blue-500" size={80} />
+          {currentUser?.photoURL ? (
+            <img
+              src={currentUser.photoURL}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full border-4 border-blue-700 shadow-lg"
+            />
+          ) : (
+            <FaUserCircle className="text-blue-500" size={80} />
+          )}
         </div>
 
         {/* Nome e email */}
-        <h2 className="text-2xl font-semibold mb-1">Test User</h2>
-        <p className="text-blue-300 text-sm mb-4">user@collabflow.com</p>
+        <h2 className="text-2xl font-semibold mb-1">
+          {currentUser?.displayName}
+        </h2>
+        <p className="text-blue-300 text-sm mb-4">{currentUser?.email}</p>
 
         {/* Código do usuário */}
         <div className="bg-[#0F172A] border border-blue-700 rounded-lg p-3 mb-6 flex items-center justify-between">
-          <span className="text-sm font-mono text-blue-300">{userCode}</span>
+          <span className="text-sm font-mono text-blue-300">{currentUser?.userCode}</span>
           <button
             onClick={handleCopy}
             className="text-blue-400 cursor-pointer hover:text-blue-200 transition"
@@ -69,7 +109,7 @@ const MyAccount: FC = () => {
             <FaUserPlus /> Adicionar Contato
           </button>
 
-          <button className="flex items-center justify-center cursor-pointer gap-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all">
+          <button onClick={handleLogout} className="flex items-center justify-center cursor-pointer gap-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all">
             <FaSignOutAlt /> Sair da Conta
           </button>
         </div>
