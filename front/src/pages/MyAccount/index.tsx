@@ -12,6 +12,22 @@ import { useAuth } from "../../context/authContext";
 import Swal from "sweetalert2";
 
 const MyAccount: FC = () => {
+  // Mock para visualização
+  const [contacts, setContacts] = useState([
+    { id: 1, name: "Alice Oliveira", userCode: "ALC-1234" },
+    { id: 2, name: "Bruno Lima", userCode: "BRN-5678" },
+    { id: 3, name: "Carla Mendes", userCode: "CRL-4321" },
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Contatos filtrados
+  const filteredContacts = contacts.filter(
+    (contact) =>
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.userCode.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const { currentUser, logOut: firebaseLogout } = useAuth();
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
@@ -48,7 +64,7 @@ const MyAccount: FC = () => {
   };
 
   return (
-    <section className="mt-10 flex justify-center items-center min-h-screen bg-gradient-to-br from-[#0F172A] to-[#1E293B] px-4">
+    <section className="py-10 mt-24 flex justify-center items-center min-h-screen bg-gradient-to-br from-[#0F172A] to-[#1E293B] px-4">
       <div className="bg-[#1E293B] border border-blue-800 text-center text-blue-100 p-8 rounded-2xl shadow-xl w-full max-w-md">
         {/* Avatar */}
         <div className="flex justify-center mb-4">
@@ -71,7 +87,9 @@ const MyAccount: FC = () => {
 
         {/* Código do usuário */}
         <div className="bg-[#0F172A] border border-blue-700 rounded-lg p-3 mb-6 flex items-center justify-between">
-          <span className="text-sm font-mono text-blue-300">{currentUser?.userCode}</span>
+          <span className="text-sm font-mono text-blue-300">
+            {currentUser?.userCode}
+          </span>
           <button
             onClick={handleCopy}
             className="text-blue-400 cursor-pointer hover:text-blue-200 transition"
@@ -100,7 +118,7 @@ const MyAccount: FC = () => {
         )}
 
         {/* Ações */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mb-8">
           <button className="flex items-center justify-center cursor-pointer gap-2 bg-[#3B82F6] hover:bg-[#1E40AF] text-white font-medium py-2 px-4 rounded-lg transition-all">
             <FaEdit /> Editar Perfil
           </button>
@@ -109,9 +127,63 @@ const MyAccount: FC = () => {
             <FaUserPlus /> Adicionar Contato
           </button>
 
-          <button onClick={handleLogout} className="flex items-center justify-center cursor-pointer gap-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all">
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center cursor-pointer gap-2 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all"
+          >
             <FaSignOutAlt /> Sair da Conta
           </button>
+        </div>
+
+        {/* Contatos */}
+        <div className="text-left mt-6">
+          <h3 className="text-lg font-semibold text-blue-300 mb-3">
+            Seus Contatos
+          </h3>
+
+          {/* Barra de busca */}
+          <div className="relative mb-4 flex justify-center items-center">
+            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"
+                />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar por nome ou código..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-[93%] pl-10 pr-5 mr-3 py-2 rounded-lg bg-[#0F172A] border border-blue-700 text-blue-100 placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <ul className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar px-2">
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map((contact) => (
+                <li
+                  key={contact.id}
+                  className="p-3 rounded-lg bg-[#0F172A] border border-blue-700 hover:bg-blue-800/30 transition"
+                >
+                  <p className="font-medium text-blue-100">{contact.name}</p>
+                  <p className="text-sm text-blue-400">{contact.userCode}</p>
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-blue-400">
+                Nenhum contato encontrado.
+              </li>
+            )}
+          </ul>
         </div>
       </div>
     </section>
