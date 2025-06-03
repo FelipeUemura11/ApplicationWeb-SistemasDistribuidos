@@ -52,6 +52,8 @@ export default function FriendRequests({ currentUser }: { currentUser: any }) {
                         setFriendRequests((prev) =>
                           prev.filter((r) => r.requesterId !== req.requesterId)
                         );
+
+                        location.reload(); 
                       }
                     }}
                     className="bg-green-600 hover:bg-green-700 text-white px-2 cursor-pointer py-1 rounded text-lg flex items-center justify-center"
