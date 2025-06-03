@@ -1,10 +1,13 @@
-import { FC, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FC, useState, useEffect } from "react";
 import {
   FaUserCircle,
   FaEdit,
   FaSignOutAlt,
   FaCopy,
   FaUserPlus,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -13,32 +16,60 @@ import Swal from "sweetalert2";
 
 import { handleSearch } from "../../services/searchUserService";
 import { sendFriendRequest } from "../../services/sendFriendRequest";
+import {
+  fetchFriendRequests,
+  acceptFriendRequest,
+  declineFriendRequest,
+} from "../../services/friendRequest";
+import { fetchContacts } from "../../services/fetchContacts";
 
 const MyAccount: FC = () => {
-  // Mock para visualização
-  const [contacts, setContacts] = useState([
-    { id: 1, name: "Alice Oliveira", userCode: "ALC-1234" },
-    { id: 2, name: "Bruno Lima", userCode: "BRN-5678" },
-    { id: 3, name: "Carla Mendes", userCode: "CRL-4321" },
-  ]);
+  const [contacts, setContacts] = useState<any[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
   // Contatos filtrados
-  const filteredContacts = contacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.userCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredContacts = contacts.filter((contact) => {
+    const name = contact.name || contact.displayName || "";
+    const code = contact.userCode || "";
+
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const [showModal, setShowModal] = useState(false);
   const [searchUser, setSearchUser] = useState("");
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [friendRequests, setFriendRequests] = useState<any[]>([]);
+
   const [results, setResults] = useState<any[]>([]);
   const { currentUser, logOut: firebaseLogout } = useAuth();
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      if (currentUser?.uid) {
+        const requests = await fetchFriendRequests(currentUser.uid);
+        setFriendRequests(requests);
+      }
+    };
+
+    fetchRequests();
+
+    const loadContacts = async () => {
+      if (currentUser?.uid) {
+        const contactList = await fetchContacts();
+        setContacts(contactList);
+
+        console.log("Contatos carregados:", contactList);
+      }
+    };
+
+    loadContacts();
+  }, [currentUser?.uid]);
 
   const onSearchInputChange = async (value: string) => {
     setSearchUser(value);
@@ -180,19 +211,21 @@ const MyAccount: FC = () => {
               placeholder="Buscar por nome ou código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-[93%] pl-10 pr-5 mr-3 py-2 rounded-lg bg-[#0F172A] border border-blue-700 text-blue-100 placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-[96%] pl-10 py-2 rounded-lg bg-[#0F172A] border border-blue-700 text-blue-100 placeholder:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <ul className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar px-2">
             {filteredContacts.length > 0 ? (
-              filteredContacts.map((contact) => (
+              filteredContacts.map((contact, index) => (
                 <li
-                  key={contact.id}
+                  key={index}
                   className="p-3 rounded-lg bg-[#0F172A] border border-blue-700 hover:bg-blue-800/30 transition"
                 >
-                  <p className="font-medium text-blue-100">{contact.name}</p>
-                  <p className="text-sm text-blue-400">{contact.userCode}</p>
+                  <p className="font-medium text-blue-100">
+                    {contact.displayName}
+                  </p>
+                  <p className="text-sm text-blue-400">{contact.email}</p>
                 </li>
               ))
             ) : (
@@ -201,6 +234,78 @@ const MyAccount: FC = () => {
               </li>
             )}
           </ul>
+        </div>
+
+        {/* Pedidos de Amizade Recebidos */}
+        <div className="text-left mt-10">
+          <h3 className="text-lg font-semibold text-blue-300 mb-3 ml-2">
+            Pedidos de Amizade
+          </h3>
+
+          {friendRequests.length > 0 ? (
+            <ul className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar px-2">
+              {friendRequests.map((req) => (
+                <li
+                  key={req.requesterId}
+                  className="p-3 rounded-lg bg-[#0F172A] border border-blue-700 flex justify-between items-center hover:bg-blue-800/30 transition"
+                >
+                  <div>
+                    <p className="font-medium text-blue-100">
+                      {req.requesterDisplayName || req.requesterId}
+                    </p>
+                    <p className="text-sm text-blue-400">
+                      Status: {req.status}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        if (currentUser?.uid) {
+                          await acceptFriendRequest(
+                            req.requesterId,
+                            currentUser.uid
+                          );
+                          setFriendRequests((prev) =>
+                            prev.filter(
+                              (r) => r.requesterId !== req.requesterId
+                            )
+                          );
+                        }
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white px-2 cursor-pointer py-1 rounded text-lg flex items-center justify-center"
+                      title="Aceitar"
+                    >
+                      <FaCheck />
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        if (currentUser?.uid) {
+                          await declineFriendRequest(
+                            req.requesterId,
+                            currentUser.uid
+                          );
+                          setFriendRequests((prev) =>
+                            prev.filter(
+                              (r) => r.requesterId !== req.requesterId
+                            )
+                          );
+                        }
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 cursor-pointer rounded text-lg flex items-center justify-center"
+                      title="Recusar"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-blue-400 ml-2">
+              Nenhum pedido recebido.
+            </p>
+          )}
         </div>
       </div>
 
@@ -268,7 +373,8 @@ const MyAccount: FC = () => {
                         if (currentUser?.uid && user.uid !== currentUser.uid) {
                           const success = await sendFriendRequest(
                             currentUser.uid,
-                            user.uid
+                            user.uid,
+                            currentUser.displayName || "Usuário"
                           );
                           if (success) {
                             Swal.fire({
