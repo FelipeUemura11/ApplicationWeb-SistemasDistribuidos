@@ -102,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setCurrentUser(extendedUser);
         } catch (err) {
           console.error("Erro ao buscar userCode:", err);
-          setCurrentUser(user); // fallback
+          setCurrentUser(user); 
         }
       } else {
         setCurrentUser(null);

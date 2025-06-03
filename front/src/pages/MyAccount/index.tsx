@@ -10,7 +10,9 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/authContext";
 import Swal from "sweetalert2";
+
 import { handleSearch } from "../../services/searchUserService";
+import { sendFriendRequest } from "../../services/sendFriendRequest";
 
 const MyAccount: FC = () => {
   // Mock para visualização
@@ -205,7 +207,7 @@ const MyAccount: FC = () => {
       {showModal && (
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300"
-          onClick={() => setShowModal(false)} 
+          onClick={() => setShowModal(false)}
         >
           <div
             className="bg-[#1E293B] text-blue-100 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-blue-700 relative transform transition-all duration-300 scale-95 animate-fadeIn"
@@ -262,8 +264,22 @@ const MyAccount: FC = () => {
                       <p className="text-sm text-blue-400">{user.email}</p>
                     </div>
                     <button
-                      onClick={() => {
-                        // lógica de envio de pedido de amizade
+                      onClick={async () => {
+                        if (currentUser?.uid && user.uid !== currentUser.uid) {
+                          const success = await sendFriendRequest(
+                            currentUser.uid,
+                            user.uid
+                          );
+                          if (success) {
+                            Swal.fire({
+                              icon: "success",
+                              title: "Pedido enviado!",
+                              text: `Pedido de amizade enviado para ${user.displayName}.`,
+                              background: "#1E293B",
+                              color: "#E0E7FF",
+                            });
+                          }
+                        }
                       }}
                       className="text-sm bg-[#3B82F6] hover:bg-[#2563EB] text-white px-4 py-1.5 rounded-md transition-all duration-200 cursor-pointer"
                     >
