@@ -97,6 +97,7 @@ export async function upsertUserInDatabase(
       await set(userRef, {
         ...userDataForUpdate,
         createdAt: serverTimestamp(),
+        contacts: {}, 
       });
     }
   } catch (error) {

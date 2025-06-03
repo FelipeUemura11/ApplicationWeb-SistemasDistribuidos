@@ -21,6 +21,7 @@ import { getUserFromDatabase } from "../services/userService"; // Import necess√
 // Extens√£o da interface User
 interface ExtendedUser extends User {
   userCode?: string;
+  contactList?: User[];
 }
 
 interface AuthContextType {
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setCurrentUser(extendedUser);
         } catch (err) {
           console.error("Erro ao buscar userCode:", err);
-          setCurrentUser(user); // fallback
+          setCurrentUser(user); 
         }
       } else {
         setCurrentUser(null);
