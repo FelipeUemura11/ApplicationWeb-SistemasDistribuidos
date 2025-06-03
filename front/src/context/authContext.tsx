@@ -21,6 +21,7 @@ import { getUserFromDatabase } from "../services/userService"; // Import necess√
 // Extens√£o da interface User
 interface ExtendedUser extends User {
   userCode?: string;
+  contactList?: User[];
 }
 
 interface AuthContextType {
