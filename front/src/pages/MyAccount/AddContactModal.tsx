@@ -23,7 +23,7 @@ export default function AddContactModal({ currentUser, setShowModal }: Props) {
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] backdrop-blur-sm transition-opacity duration-300"
         onClick={() => setShowModal(false)}
       >
         <div
