@@ -13,7 +13,7 @@ export default function GroupList({ activeChatId, chatList, onChatSelect }: Prop
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   return (
-    <div className="custom-scrollbar flex-grow h-full">
+    <div className="custom-scrollbar overflow-y-auto flex-grow md:min-h-[540px] h-full">
       <ul className="space-y-px p-2 flex flex-col gap-1">
         {chatList.map((chat) => (
           <li
