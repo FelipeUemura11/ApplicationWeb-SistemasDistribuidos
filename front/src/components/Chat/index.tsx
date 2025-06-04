@@ -62,7 +62,10 @@ export default function Chat({ chatId }: ChatProps) {
   if (!chatId) {
     return (
       <div className="w-full md:w-2/5 min-w-[260px] h-[578px] flex items-center justify-center bg-[#0F172A] text-blue-400">
-        <p className="mx-auto flex text-center"> Selecione um chat para começar a conversar.</p>
+        <p className="mx-auto flex text-center">
+          {" "}
+          Selecione um chat para começar a conversar.
+        </p>
       </div>
     );
   }
@@ -73,22 +76,30 @@ export default function Chat({ chatId }: ChatProps) {
         ref={messagesContainerRef}
         className="flex-1 h-0 bg-[#0F172A] rounded p-2 overflow-auto text-blue-200"
       >
-        {messages.map((msg) => (
-          <div key={msg.id} className="flex gap-2 mb-2">
-            <div
-              className={`px-4 py-2 rounded-lg max-w-xs ${
-                msg.senderId === currentUser?.uid
-                  ? "bg-blue-600 text-white ml-auto"
-                  : "bg-blue-800 text-blue-100 mr-auto"
-              }`}
-            >
-              {msg.senderId !== currentUser?.uid && msg.senderName && (
-                <p className="text-xs text-blue-300 mb-1">{msg.senderName}</p>
-              )}
-              {msg.text}
+        {messages.map((msg, index) => {
+          const prevMsg = messages[index - 1];
+          const isDifferentSender =
+            !prevMsg || prevMsg.senderId !== msg.senderId;
+
+          const spacingClass = isDifferentSender ? "mt-4" : "mt-2";
+
+          return (
+            <div key={msg.id} className={`flex gap-2 ${spacingClass}`}>
+              <div
+                className={`px-4 py-2 rounded-lg max-w-xs ${
+                  msg.senderId === currentUser?.uid
+                    ? "bg-blue-600 text-white ml-auto"
+                    : "bg-blue-800 text-blue-100 mr-auto"
+                }`}
+              >
+                {msg.senderId !== currentUser?.uid && msg.senderName && (
+                  <p className="text-xs text-blue-300 mb-1">{msg.senderName}</p>
+                )}
+                {msg.text}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="mt-2 flex gap-2">
         <input

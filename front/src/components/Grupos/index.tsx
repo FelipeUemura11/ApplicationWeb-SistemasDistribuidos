@@ -2,20 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
-import { addMembersToGroup } from "../../services/chatService";
 import { UserChatInfoForList } from "../../services/chatService";
-import {
-  FiPlusCircle,
-  FiUsers,
-  FiMessageSquare,
-  FiAlertCircle,
-  FiMoreVertical,
-} from "react-icons/fi";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import { fetchContacts } from "../../services/fetchContacts";
-
-const MySwal = withReactContent(Swal);
+import Loading from "./Loading";
+import GroupError from "./GroupError";
+import GroupList from "./GroupList";
+import GroupHeader from "./GroupHeader";
 
 interface GruposProps {
   onChatSelect: (chatId: string) => void;
@@ -27,7 +18,6 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
   const [chatList, setChatList] = useState<UserChatInfoForList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentUser?.uid) {
@@ -68,185 +58,18 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
     };
   }, [currentUser?.uid]);
 
-  const handleCreateGroup = async () => {
-    if (!currentUser?.uid) return;
-
-    const { value: groupName } = await Swal.fire({
-      background: "#1E293B",
-      color: "#E0E7FF",
-      title: "Criar Novo Grupo",
-      input: "text",
-      inputLabel: "Nome do Grupo",
-      inputPlaceholder: "Digite o nome do grupo...",
-      inputAttributes: {
-        autocapitalize: "off",
-      },
-      showCancelButton: true,
-      confirmButtonText: "Criar Grupo",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#3B82F6",
-      cancelButtonColor: "#EF4444",
-      customClass: {
-        popup: "bg-[#1E293B] text-blue-100 rounded-lg",
-        title: "text-blue-100",
-        input:
-          "bg-[#0F172A] text-blue-100 border-blue-700 focus:ring-blue-500 focus:border-blue-500",
-        inputLabel: "text-blue-300",
-        actions: "gap-x-2",
-      },
-      inputValidator: (value) => {
-        if (!value || value.trim().length === 0) {
-          return "Você precisa digitar um nome para o grupo!";
-        }
-        if (value.length > 50) {
-          return "O nome do grupo não pode ter mais de 50 caracteres.";
-        }
-      },
-    });
-
-    if (groupName && groupName.trim()) {
-      setIsLoading(true);
-      try {
-        const newChatId = await chatService.createChatRoom(
-          currentUser.uid,
-          [currentUser.uid],
-          groupName.trim(),
-          true
-        );
-        if (newChatId) {
-          onChatSelect(newChatId);
-          Swal.fire({
-            title: "Sucesso!",
-            text: `Grupo "${groupName.trim()}" criado.`,
-            icon: "success",
-            background: "#1E293B",
-            color: "#E0E7FF",
-            confirmButtonColor: "#3B82F6",
-          });
-        }
-      } catch (e) {
-        console.error("Erro ao criar grupo:", e);
-        Swal.fire({
-          title: "Erro!",
-          text: "Não foi possível criar o grupo.",
-          icon: "error",
-          background: "#1E293B",
-          color: "#E0E7FF",
-          confirmButtonColor: "#EF4444",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleAddMembers = async (chatId: string) => {
-    const contacts = await fetchContacts();
-    const htmlContent = `${
-      contacts.length > 0
-        ? `<ul class="text-left space-y-2 max-h-60 overflow-y-auto custom-scrollbar px-1">
-        ${contacts
-          .map(
-            (c: any) => `
-            <li class="bg-[#0F172A] border border-blue-700 p-3 rounded-lg flex justify-between items-center hover:bg-blue-800/30 transition-colors duration-200">
-              <div>
-                <p class="font-medium text-blue-100">${
-                  c.displayName || c.email
-                }</p>
-                <p class="text-sm text-blue-400">${c.email}</p>
-              </div>
-              <input 
-                type="checkbox" 
-                value="${c.uid}" 
-                id="user-${c.uid}" 
-                class="form-checkbox h-5 w-5 text-blue-500 bg-slate-800 border-blue-700 rounded focus:ring-0 cursor-pointer"
-              />
-            </li>`
-          )
-          .join("")}
-      </ul>`
-        : `<p class="text-blue-300 text-sm">Você não possui contatos para adicionar.</p>`
-    }`;
-
-    const { value: selected } = await MySwal.fire({
-      title: "Adicionar Contatos ao Grupo",
-      html: htmlContent,
-      background: "#1E293B",
-      color: "#E0E7FF",
-      confirmButtonText: "Adicionar",
-      showCancelButton: true,
-      preConfirm: () => {
-        const checkboxes = document.querySelectorAll(
-          "input[type='checkbox']:checked"
-        );
-        return Array.from(checkboxes).map((cb: any) => cb.value);
-      },
-    });
-
-    if (selected && selected.length > 0) {
-      try {
-        await addMembersToGroup(chatId, selected);
-        Swal.fire({
-          icon: "success",
-          title: "Contatos adicionados com sucesso!",
-          background: "#1E293B",
-          color: "#E0E7FF",
-        });
-      } catch (err) {
-        console.error("Erro ao adicionar membros:", err);
-        Swal.fire({
-          icon: "error",
-          title: "Erro",
-          text: "Não foi possível adicionar os contatos ao grupo.",
-          background: "#1E293B",
-          color: "#E0E7FF",
-        });
-      }
-    }
-  };
-
   return (
     <div className="w-full md:w-[280px] lg:w-[320px] h-full flex-shrink-0 flex flex-col bg-[#0F172A] md:border-r border-blue-700 shadow-md md:shadow-none">
-      <div className="px-4 py-3 w-full flex justify-between items-center border-b border-blue-700/50 md:pt-4">
-        <h2 className="font-bold text-xl text-blue-100">Conversas</h2>
-        <button
-          onClick={handleCreateGroup}
-          title="Criar Novo Grupo"
-          className="p-2 text-blue-300 hover:text-blue-100 transition-colors rounded-full hover:bg-blue-700/50"
-        >
-          <FiPlusCircle size={24} className="cursor-pointer" />
-        </button>
-      </div>
+      <GroupHeader
+        onChatSelect={onChatSelect}
+        setIsLoading={setIsLoading}
+        currentUser={currentUser}
+      />
 
       {isLoading ? (
-        <div className="flex-grow flex items-center justify-center text-blue-400 mt-4">
-          <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-400"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          Carregando...
-        </div>
+        <Loading />
       ) : error ? (
-        <div className="flex-grow flex flex-col items-center justify-center text-red-400 p-4">
-          <FiAlertCircle size={32} className="mb-2" />
-          <p className="text-center">{error}</p>
-        </div>
+        <GroupError error={error} />
       ) : chatList.length === 0 ? (
         <div className="flex-grow flex items-center justify-center text-blue-500 p-4">
           <p className="text-center">
@@ -254,86 +77,11 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
           </p>
         </div>
       ) : (
-        <div className="custom-scrollbar flex-grow h-full">
-          <ul className="space-y-px p-2 flex flex-col gap-1">
-            {chatList.map((chat) => (
-              <li
-                key={chat.id}
-                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-150 w-full cursor-pointer relative
-                  ${
-                    activeChatId === chat.id
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "hover:bg-slate-700/70 text-slate-300"
-                  }`}
-                onClick={() => onChatSelect(chat.id)}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white text-lg font-semibold
-                  ${
-                    chat.isGroup
-                      ? activeChatId === chat.id
-                        ? "bg-purple-400"
-                        : "bg-purple-600"
-                      : activeChatId === chat.id
-                      ? "bg-green-400"
-                      : "bg-green-600"
-                  }`}
-                >
-                  {chat.isGroup ? (
-                    <FiUsers size={20} />
-                  ) : (
-                    chat.displayName?.charAt(0).toUpperCase() || (
-                      <FiMessageSquare size={20} />
-                    )
-                  )}
-                </div>
-                <div className="overflow-hidden flex-grow">
-                  <p
-                    className={`text-sm font-medium truncate ${
-                      activeChatId === chat.id ? "text-white" : "text-slate-100"
-                    }`}
-                  >
-                    {chat.displayName}
-                  </p>
-                  {chat.lastMessage && (
-                    <p
-                      className={`text-xs truncate ${
-                        activeChatId === chat.id
-                          ? "text-blue-100"
-                          : "text-slate-400"
-                      }`}
-                    >
-                      {chat.lastMessage}
-                    </p>
-                  )}
-                </div>
-                {chat.isGroup && (
-                  <div className="relative z-90">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMenuOpen(menuOpen === chat.id ? null : chat.id);
-                      }}
-                      className="text-blue-300 hover:text-blue-100 p-1 rounded-full hover:bg-blue-700/40"
-                    >
-                      <FiMoreVertical size={18} />
-                    </button>
-                    {menuOpen === chat.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] border border-blue-700 rounded-md shadow-lg p-2 text-sm text-blue-100 z-30">
-                        <button
-                          onClick={() => handleAddMembers(chat.id)}
-                          className="w-full text-left hover:bg-blue-700/30 p-2 rounded cursor-pointer"
-                        >
-                          Adicionar Contatos
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <GroupList
+          chatList={chatList}
+          activeChatId={activeChatId}
+          onChatSelect={onChatSelect}
+        />
       )}
     </div>
   );
