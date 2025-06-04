@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
+import { addMembersToGroup } from "../../services/chatService";
 import { UserChatInfoForList } from "../../services/chatService";
 import {
   FiPlusCircle,
@@ -139,7 +140,7 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
     }
   };
 
-  const handleAddMembers = async () => {
+  const handleAddMembers = async (chatId: string) => {
     const contacts = await fetchContacts();
     const htmlContent = `${
       contacts.length > 0
@@ -183,8 +184,24 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
     });
 
     if (selected && selected.length > 0) {
-      console.log("Contatos selecionados para adicionar:", selected);
-      // Aqui você pode chamar uma função para atualizar os membros do grupo no Firebase
+      try {
+        await addMembersToGroup(chatId, selected);
+        Swal.fire({
+          icon: "success",
+          title: "Contatos adicionados com sucesso!",
+          background: "#1E293B",
+          color: "#E0E7FF",
+        });
+      } catch (err) {
+        console.error("Erro ao adicionar membros:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Erro",
+          text: "Não foi possível adicionar os contatos ao grupo.",
+          background: "#1E293B",
+          color: "#E0E7FF",
+        });
+      }
     }
   };
 
@@ -304,7 +321,7 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
                     {menuOpen === chat.id && (
                       <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] border border-blue-700 rounded-md shadow-lg p-2 text-sm text-blue-100 z-30">
                         <button
-                          onClick={handleAddMembers}
+                          onClick={() => handleAddMembers(chat.id)}
                           className="w-full text-left hover:bg-blue-700/30 p-2 rounded cursor-pointer"
                         >
                           Adicionar Contatos

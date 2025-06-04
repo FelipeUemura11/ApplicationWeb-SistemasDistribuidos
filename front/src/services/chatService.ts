@@ -19,12 +19,12 @@ import { getUserFromDatabase } from "./userService";
 export interface ChatMetadata {
   id: string;
   name?: string;
-  members: { [uid: string]: true };
+  members: { [uid: string]: boolean };
   lastMessage?: string;
   lastMessageTimestamp?: number | object;
   createdAt: number | object;
   isGroup: boolean;
-  creatorUid?: string;
+  creatorUid: string;
 }
 
 export interface Message {
@@ -300,80 +300,110 @@ export async function createChatRoom(
   chatName?: string,
   isGroup: boolean = false
 ): Promise<string | null> {
+  // Garante que o criador esteja na lista de membros
   if (!memberUids.includes(creatorUid)) {
-    memberUids.push(creatorUid);
+    memberUids = [...memberUids, creatorUid];
   }
+
+  // Validação para grupos
   if (isGroup && !chatName) {
-    console.error("Nome do chat é obrigatório para criar um grupo.");
-    return null;
+    throw new Error("Nome do chat é obrigatório para criar um grupo.");
   }
 
-  let chatId: string;
-  let finalChatName = chatName;
+  // Criação do ID do chat
+  const chatId = isGroup
+    ? push(ref(db, "chats")).key
+    : `${memberUids.sort().join("_")}`;
 
-  if (!isGroup && memberUids.length === 2) {
-    memberUids.sort();
-    chatId = `${memberUids[0]}_${memberUids[1]}`;
-  } else if (isGroup) {
-    const newChatRefKey = push(ref(db, "chats")).key;
-    if (!newChatRefKey) {
-      console.error("Falha ao gerar ID de chat");
-      return null;
-    }
-    chatId = newChatRefKey;
-  } else {
-    console.error("Configuração de chat inválida.");
-    return null;
+  if (!chatId) {
+    throw new Error("Falha ao gerar ID de chat");
   }
 
-  const membersObject: { [uid: string]: true } = {};
-  memberUids.forEach((uid) => (membersObject[uid] = true));
+  const members = memberUids.reduce(
+    (acc, uid) => ({ ...acc, [uid]: true }),
+    {}
+  );
 
-  const chatMetadata: Omit<ChatMetadata, "id"> = {
-    name: finalChatName,
-    members: membersObject,
+  const chatMetadata: ChatMetadata = {
+    id: chatId,
+    name: chatName,
+    members,
     createdAt: serverTimestamp(),
-    isGroup: isGroup,
-    creatorUid: isGroup ? creatorUid : undefined,
+    isGroup,
+    creatorUid, 
     lastMessage: isGroup ? "Grupo criado!" : "Chat iniciado!",
     lastMessageTimestamp: serverTimestamp(),
   };
-  await set(ref(db, `chats/${chatId}/metadata`), chatMetadata);
 
-  for (const uid of memberUids) {
-    await set(ref(db, `userChats/${uid}/${chatId}`), true);
+  // Atualizações atômicas
+  const updates: Record<string, any> = {
+    [`chats/${chatId}/metadata`]: chatMetadata,
+  };
+
+  // Adiciona aos userChats de cada membro
+  memberUids.forEach((uid) => {
+    updates[`userChats/${uid}/${chatId}`] = true;
+  });
+
+  try {
+    await update(ref(db), updates);
+    return chatId;
+  } catch (error) {
+    console.error("Erro ao criar chat:", error);
+    throw error;
   }
-  return chatId;
 }
 
 export async function addMembersToGroup(
   chatId: string,
   newMemberUids: string[]
 ): Promise<void> {
-  const chatRef = ref(db, `chats/${chatId}/metadata`);
+  // Verificação inicial
+  if (!chatId || !newMemberUids?.length) {
+    throw new Error("Parâmetros inválidos");
+  }
 
-  const snapshot = await get(chatRef);
+  // Obtém os metadados atuais
+  const metadataRef = ref(db, `chats/${chatId}/metadata`);
+  const snapshot = await get(metadataRef);
+
   if (!snapshot.exists()) {
-    throw new Error("Grupo não encontrado.");
+    throw new Error("Grupo não encontrado");
   }
 
   const metadata = snapshot.val() as ChatMetadata;
+
   if (!metadata.isGroup) {
-    throw new Error("Não é possível adicionar membros a um chat individual.");
+    throw new Error("Apenas grupos podem ter membros adicionados");
   }
 
-  const updatedMembers = { ...metadata.members };
-  newMemberUids.forEach((uid) => {
-    updatedMembers[uid] = true;
+  // Filtra membros que já existem
+  const existingMembers = Object.keys(metadata.members || {});
+  const membersToAdd = newMemberUids.filter(
+    (uid) => !existingMembers.includes(uid)
+  );
+
+  if (!membersToAdd.length) {
+    return; // Nenhum membro novo para adicionar
+  }
+
+  // Prepara atualizações
+  const updates: Record<string, any> = {};
+
+  // Adiciona novos membros
+  membersToAdd.forEach((uid) => {
+    updates[`chats/${chatId}/metadata/members/${uid}`] = true;
+    updates[`userChats/${uid}/${chatId}`] = true;
   });
 
-  // Atualiza os membros no metadata do grupo
-  await update(chatRef, {
-    members: updatedMembers,
-  });
+  // Atualiza lastMessageTimestamp
+  updates[`chats/${chatId}/metadata/lastMessage`] = "Novos membros adicionados";
+  updates[`chats/${chatId}/metadata/lastMessageTimestamp`] = serverTimestamp();
 
-  // Garante que os novos membros tenham o grupo listado em seus userChats
-  for (const uid of newMemberUids) {
-    await set(ref(db, `userChats/${uid}/${chatId}`), true);
+  try {
+    await update(ref(db), updates);
+  } catch (error) {
+    console.error("Erro ao adicionar membros:", error);
+    throw new Error("Não foi possível adicionar os membros ao grupo");
   }
 }
