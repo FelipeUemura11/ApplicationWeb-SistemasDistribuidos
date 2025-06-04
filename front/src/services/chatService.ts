@@ -35,7 +35,8 @@ export interface Message {
   timestamp: number | object;
 }
 
-export interface UserChatInfoForList extends Omit<ChatMetadata, 'members' | 'lastMessageTimestamp' | 'createdAt'> {
+export interface UserChatInfoForList
+  extends Omit<ChatMetadata, "members" | "lastMessageTimestamp" | "createdAt"> {
   id: string;
   displayName: string;
   displayPhoto?: string;
@@ -71,18 +72,25 @@ export function onMessages(
 ): Unsubscribe {
   const messagesQuery = query(
     ref(db, `chats/${chatId}/messages`),
-    orderByChild('timestamp')
+    orderByChild("timestamp")
   );
 
-  const listener = onValue(messagesQuery, (snapshot: DataSnapshot) => {
-    const messages: Message[] = [];
-    snapshot.forEach(childSnapshot => {
-      messages.push({ ...childSnapshot.val(), id: childSnapshot.key } as Message);
-    });
-    callback(messages);
-  }, (error) => {
-    console.error("Erro ao ouvir mensagens:", error);
-  });
+  const listener = onValue(
+    messagesQuery,
+    (snapshot: DataSnapshot) => {
+      const messages: Message[] = [];
+      snapshot.forEach((childSnapshot) => {
+        messages.push({
+          ...childSnapshot.val(),
+          id: childSnapshot.key,
+        } as Message);
+      });
+      callback(messages);
+    },
+    (error) => {
+      console.error("Erro ao ouvir mensagens:", error);
+    }
+  );
 
   return () => off(messagesQuery, "value", listener);
 }
@@ -97,136 +105,192 @@ export function listenToUserChats(
   const userChatsRef = ref(db, `userChats/${currentUserId}`);
   let activeMetadataListeners: { [chatId: string]: Unsubscribe } = {};
 
-  const mainListener = onValue(userChatsRef, async (snapshot) => {
-    Object.values(activeMetadataListeners).forEach(unsub => unsub());
-    activeMetadataListeners = {};
+  const mainListener = onValue(
+    userChatsRef,
+    async (snapshot) => {
+      Object.values(activeMetadataListeners).forEach((unsub) => unsub());
+      activeMetadataListeners = {};
 
-    if (!snapshot.exists() || !snapshot.hasChildren()) {
-      onUpdate([]);
-      onLoading(false);
-      return;
-    }
-
-    const chatEntries = snapshot.val();
-    const chatIds = Object.keys(chatEntries);
-    const chatListPromises: Promise<UserChatInfoForList | null>[] = [];
-
-    const processChat = async (chatId: string, initialLoad: boolean = false) => {
-      const chatMetadataRef = ref(db, `chats/${chatId}/metadata`);
-      if (activeMetadataListeners[chatId]) {
-        activeMetadataListeners[chatId]();
+      if (!snapshot.exists() || !snapshot.hasChildren()) {
+        onUpdate([]);
+        onLoading(false);
+        return;
       }
 
-      activeMetadataListeners[chatId] = onValue(chatMetadataRef, async (metadataSnapshot) => {
-        if (metadataSnapshot.exists()) {
-          const metadata = metadataSnapshot.val() as Omit<ChatMetadata, 'id'>;
-          let finalDisplayName = metadata.name || "Chat";
-          let finalDisplayPhoto = metadata.isGroup ? "URL_FOTO_GRUPO_PADRAO" : "URL_FOTO_USUARIO_PADRAO";
+      const chatEntries = snapshot.val();
+      const chatIds = Object.keys(chatEntries);
+      const chatListPromises: Promise<UserChatInfoForList | null>[] = [];
 
-          if (!metadata.isGroup && metadata.members) {
-            const memberUids = Object.keys(metadata.members);
-            const otherUserUid = memberUids.find(uid => uid !== currentUserId);
-            if (otherUserUid) {
-              try {
-                const otherUserProfile = await getUserFromDatabase(otherUserUid);
-                finalDisplayName = otherUserProfile?.displayName || `Conversa`;
-                finalDisplayPhoto = otherUserProfile?.photoURL || finalDisplayPhoto;
-              } catch (e) {
-                finalDisplayName = "Chat Privado";
+      const processChat = async (
+        chatId: string,
+        initialLoad: boolean = false
+      ) => {
+        const chatMetadataRef = ref(db, `chats/${chatId}/metadata`);
+        if (activeMetadataListeners[chatId]) {
+          activeMetadataListeners[chatId]();
+        }
+
+        activeMetadataListeners[chatId] = onValue(
+          chatMetadataRef,
+          async (metadataSnapshot) => {
+            if (metadataSnapshot.exists()) {
+              const metadata = metadataSnapshot.val() as Omit<
+                ChatMetadata,
+                "id"
+              >;
+              let finalDisplayName = metadata.name || "Chat";
+              let finalDisplayPhoto = metadata.isGroup
+                ? "URL_FOTO_GRUPO_PADRAO"
+                : "URL_FOTO_USUARIO_PADRAO";
+
+              if (!metadata.isGroup && metadata.members) {
+                const memberUids = Object.keys(metadata.members);
+                const otherUserUid = memberUids.find(
+                  (uid) => uid !== currentUserId
+                );
+                if (otherUserUid) {
+                  try {
+                    const otherUserProfile = await getUserFromDatabase(
+                      otherUserUid
+                    );
+                    finalDisplayName =
+                      otherUserProfile?.displayName || `Conversa`;
+                    finalDisplayPhoto =
+                      otherUserProfile?.photoURL || finalDisplayPhoto;
+                  } catch (e) {
+                    finalDisplayName = "Chat Privado";
+                  }
+                } else {
+                  finalDisplayName = "Chat individual";
+                }
+              } else if (metadata.isGroup) {
+                finalDisplayName = metadata.name || "Grupo";
+              }
+
+              const chatInfo: UserChatInfoForList = {
+                ...metadata,
+                id: chatId,
+                displayName: finalDisplayName,
+                displayPhoto: finalDisplayPhoto,
+                createdAt:
+                  typeof metadata.createdAt === "object"
+                    ? Date.now()
+                    : metadata.createdAt,
+                lastMessageTimestamp:
+                  typeof metadata.lastMessageTimestamp === "object"
+                    ? Date.now()
+                    : metadata.lastMessageTimestamp,
+              };
+
+              const currentChatSnap = await get(userChatsRef);
+              if (currentChatSnap.exists()) {
+                const allChatIds = Object.keys(currentChatSnap.val());
+                const allChatInfoPromises = allChatIds.map(async (cId) => {
+                  const metaSnap = await get(ref(db, `chats/${cId}/metadata`));
+                  if (metaSnap.exists()) {
+                    const meta = metaSnap.val() as Omit<ChatMetadata, "id">;
+                    let dName = meta.name || "Chat";
+                    if (!meta.isGroup && meta.members) {
+                      const mUids = Object.keys(meta.members);
+                      const oUid = mUids.find((u) => u !== currentUserId);
+                      if (oUid) {
+                        const oProfile = await getUserFromDatabase(oUid);
+                        dName = oProfile?.displayName || `Conversa`;
+                      }
+                    } else if (meta.isGroup) dName = meta.name || "Grupo";
+                    return {
+                      ...meta,
+                      id: cId,
+                      displayName: dName,
+                      createdAt: meta.createdAt as number,
+                      lastMessageTimestamp: meta.lastMessageTimestamp as number,
+                    } as UserChatInfoForList;
+                  }
+                  return null;
+                });
+                const updatedFullList = (
+                  await Promise.all(allChatInfoPromises)
+                ).filter((c) => c !== null) as UserChatInfoForList[];
+                onUpdate(updatedFullList);
               }
             } else {
-                finalDisplayName = "Chat individual";
+              const currentChatSnap = await get(userChatsRef);
+              if (currentChatSnap.exists()) {
+              } else {
+                onUpdate([]);
+              }
             }
-          } else if (metadata.isGroup) {
-            finalDisplayName = metadata.name || "Grupo";
-          }
+          },
+          onError
+        );
+      };
 
-          const chatInfo: UserChatInfoForList = {
-            ...metadata,
-            id: chatId,
-            displayName: finalDisplayName,
-            displayPhoto: finalDisplayPhoto,
-            createdAt: typeof metadata.createdAt === 'object' ? Date.now() : metadata.createdAt,
-            lastMessageTimestamp: typeof metadata.lastMessageTimestamp === 'object' ? Date.now() : metadata.lastMessageTimestamp,
-          };
-
-           const currentChatSnap = await get(userChatsRef);
-           if (currentChatSnap.exists()) {
-               const allChatIds = Object.keys(currentChatSnap.val());
-               const allChatInfoPromises = allChatIds.map(async (cId) => {
-                   const metaSnap = await get(ref(db, `chats/${cId}/metadata`));
-                   if (metaSnap.exists()) {
-                       const meta = metaSnap.val() as Omit<ChatMetadata, 'id'>;
-                       let dName = meta.name || "Chat";
-                       if (!meta.isGroup && meta.members) {
-                           const mUids = Object.keys(meta.members);
-                           const oUid = mUids.find(u => u !== currentUserId);
-                           if (oUid) {
-                               const oProfile = await getUserFromDatabase(oUid);
-                               dName = oProfile?.displayName || `Conversa`;
-                           }
-                       } else if (meta.isGroup) dName = meta.name || "Grupo";
-                       return { ...meta, id: cId, displayName: dName, createdAt: meta.createdAt as number, lastMessageTimestamp: meta.lastMessageTimestamp as number } as UserChatInfoForList;
-                   }
-                   return null;
-               });
-               const updatedFullList = (await Promise.all(allChatInfoPromises)).filter(c => c !== null) as UserChatInfoForList[];
-               onUpdate(updatedFullList);
-           }
-
-        } else {
-          const currentChatSnap = await get(userChatsRef);
-           if (currentChatSnap.exists()) {
-           } else {
-               onUpdate([]);
-           }
-        }
-      }, onError);
-    };
-
-    chatIds.forEach(chatId => chatListPromises.push(
-        get(ref(db, `chats/${chatId}/metadata`)).then(async metadataSnapshot => {
-            if (metadataSnapshot.exists()) {
+      chatIds.forEach((chatId) =>
+        chatListPromises.push(
+          get(ref(db, `chats/${chatId}/metadata`)).then(
+            async (metadataSnapshot) => {
+              if (metadataSnapshot.exists()) {
                 processChat(chatId, true);
-                const metadata = metadataSnapshot.val() as Omit<ChatMetadata, 'id'>;
+                const metadata = metadataSnapshot.val() as Omit<
+                  ChatMetadata,
+                  "id"
+                >;
                 let finalDisplayName = metadata.name || "Chat";
-                 if (!metadata.isGroup && metadata.members) {
-                    const memberUids = Object.keys(metadata.members);
-                    const otherUserUid = memberUids.find(uid => uid !== currentUserId);
-                    if (otherUserUid) {
-                        try {
-                            const otherUserProfile = await getUserFromDatabase(otherUserUid);
-                            finalDisplayName = otherUserProfile?.displayName || `Conversa`;
-                        } catch (e) { finalDisplayName = "Chat Privado"; }
-                    } else { finalDisplayName = "Chat individual"; }
-                } else if (metadata.isGroup) { finalDisplayName = metadata.name || "Grupo"; }
+                if (!metadata.isGroup && metadata.members) {
+                  const memberUids = Object.keys(metadata.members);
+                  const otherUserUid = memberUids.find(
+                    (uid) => uid !== currentUserId
+                  );
+                  if (otherUserUid) {
+                    try {
+                      const otherUserProfile = await getUserFromDatabase(
+                        otherUserUid
+                      );
+                      finalDisplayName =
+                        otherUserProfile?.displayName || `Conversa`;
+                    } catch (e) {
+                      finalDisplayName = "Chat Privado";
+                    }
+                  } else {
+                    finalDisplayName = "Chat individual";
+                  }
+                } else if (metadata.isGroup) {
+                  finalDisplayName = metadata.name || "Grupo";
+                }
 
-                return { 
-                    ...metadata, 
-                    id: chatId, 
-                    displayName: finalDisplayName, 
-                    createdAt: metadata.createdAt as number,
-                    lastMessageTimestamp: metadata.lastMessageTimestamp as number
+                return {
+                  ...metadata,
+                  id: chatId,
+                  displayName: finalDisplayName,
+                  createdAt: metadata.createdAt as number,
+                  lastMessageTimestamp: metadata.lastMessageTimestamp as number,
                 } as UserChatInfoForList;
+              }
+              return null;
             }
-            return null;
+          )
+        )
+      );
+
+      Promise.all(chatListPromises)
+        .then((resolvedChats) => {
+          const filteredChats = resolvedChats.filter(
+            (c) => c !== null
+          ) as UserChatInfoForList[];
+          onUpdate(filteredChats);
+          onLoading(false);
         })
-    ));
-
-    Promise.all(chatListPromises).then(resolvedChats => {
-        const filteredChats = resolvedChats.filter(c => c !== null) as UserChatInfoForList[];
-        onUpdate(filteredChats);
-        onLoading(false);
-    }).catch(err => {
-        onError(err);
-        onLoading(false);
-    });
-
-  }, onError);
+        .catch((err) => {
+          onError(err);
+          onLoading(false);
+        });
+    },
+    onError
+  );
 
   return () => {
     off(userChatsRef, "value", mainListener);
-    Object.values(activeMetadataListeners).forEach(unsub => unsub());
+    Object.values(activeMetadataListeners).forEach((unsub) => unsub());
   };
 }
 
@@ -240,7 +304,8 @@ export async function createChatRoom(
     memberUids.push(creatorUid);
   }
   if (isGroup && !chatName) {
-    console.error("Nome do chat é obrigatório para criar um grupo."); return null;
+    console.error("Nome do chat é obrigatório para criar um grupo.");
+    return null;
   }
 
   let chatId: string;
@@ -250,24 +315,28 @@ export async function createChatRoom(
     memberUids.sort();
     chatId = `${memberUids[0]}_${memberUids[1]}`;
   } else if (isGroup) {
-    const newChatRefKey = push(ref(db, 'chats')).key;
-    if (!newChatRefKey) { console.error("Falha ao gerar ID de chat"); return null; }
+    const newChatRefKey = push(ref(db, "chats")).key;
+    if (!newChatRefKey) {
+      console.error("Falha ao gerar ID de chat");
+      return null;
+    }
     chatId = newChatRefKey;
   } else {
-    console.error("Configuração de chat inválida."); return null;
+    console.error("Configuração de chat inválida.");
+    return null;
   }
 
   const membersObject: { [uid: string]: true } = {};
-  memberUids.forEach(uid => membersObject[uid] = true);
+  memberUids.forEach((uid) => (membersObject[uid] = true));
 
-  const chatMetadata: Omit<ChatMetadata, 'id'> = {
+  const chatMetadata: Omit<ChatMetadata, "id"> = {
     name: finalChatName,
     members: membersObject,
     createdAt: serverTimestamp(),
     isGroup: isGroup,
     creatorUid: isGroup ? creatorUid : undefined,
     lastMessage: isGroup ? "Grupo criado!" : "Chat iniciado!",
-    lastMessageTimestamp: serverTimestamp()
+    lastMessageTimestamp: serverTimestamp(),
   };
   await set(ref(db, `chats/${chatId}/metadata`), chatMetadata);
 
@@ -275,4 +344,36 @@ export async function createChatRoom(
     await set(ref(db, `userChats/${uid}/${chatId}`), true);
   }
   return chatId;
+}
+
+export async function addMembersToGroup(
+  chatId: string,
+  newMemberUids: string[]
+): Promise<void> {
+  const chatRef = ref(db, `chats/${chatId}/metadata`);
+
+  const snapshot = await get(chatRef);
+  if (!snapshot.exists()) {
+    throw new Error("Grupo não encontrado.");
+  }
+
+  const metadata = snapshot.val() as ChatMetadata;
+  if (!metadata.isGroup) {
+    throw new Error("Não é possível adicionar membros a um chat individual.");
+  }
+
+  const updatedMembers = { ...metadata.members };
+  newMemberUids.forEach((uid) => {
+    updatedMembers[uid] = true;
+  });
+
+  // Atualiza os membros no metadata do grupo
+  await update(chatRef, {
+    members: updatedMembers,
+  });
+
+  // Garante que os novos membros tenham o grupo listado em seus userChats
+  for (const uid of newMemberUids) {
+    await set(ref(db, `userChats/${uid}/${chatId}`), true);
+  }
 }

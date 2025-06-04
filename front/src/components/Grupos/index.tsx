@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/authContext";
 import * as chatService from "../../services/chatService";
@@ -10,6 +11,10 @@ import {
   FiMoreVertical,
 } from "react-icons/fi";
 import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { fetchContacts } from "../../services/fetchContacts";
+
+const MySwal = withReactContent(Swal);
 
 interface GruposProps {
   onChatSelect: (chatId: string) => void;
@@ -134,6 +139,55 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
     }
   };
 
+  const handleAddMembers = async () => {
+    const contacts = await fetchContacts();
+    const htmlContent = `${
+      contacts.length > 0
+        ? `<ul class="text-left space-y-2 max-h-60 overflow-y-auto custom-scrollbar px-1">
+        ${contacts
+          .map(
+            (c: any) => `
+            <li class="bg-[#0F172A] border border-blue-700 p-3 rounded-lg flex justify-between items-center hover:bg-blue-800/30 transition-colors duration-200">
+              <div>
+                <p class="font-medium text-blue-100">${
+                  c.displayName || c.email
+                }</p>
+                <p class="text-sm text-blue-400">${c.email}</p>
+              </div>
+              <input 
+                type="checkbox" 
+                value="${c.uid}" 
+                id="user-${c.uid}" 
+                class="form-checkbox h-5 w-5 text-blue-500 bg-slate-800 border-blue-700 rounded focus:ring-0 cursor-pointer"
+              />
+            </li>`
+          )
+          .join("")}
+      </ul>`
+        : `<p class="text-blue-300 text-sm">Você não possui contatos para adicionar.</p>`
+    }`;
+
+    const { value: selected } = await MySwal.fire({
+      title: "Adicionar Contatos ao Grupo",
+      html: htmlContent,
+      background: "#1E293B",
+      color: "#E0E7FF",
+      confirmButtonText: "Adicionar",
+      showCancelButton: true,
+      preConfirm: () => {
+        const checkboxes = document.querySelectorAll(
+          "input[type='checkbox']:checked"
+        );
+        return Array.from(checkboxes).map((cb: any) => cb.value);
+      },
+    });
+
+    if (selected && selected.length > 0) {
+      console.log("Contatos selecionados para adicionar:", selected);
+      // Aqui você pode chamar uma função para atualizar os membros do grupo no Firebase
+    }
+  };
+
   return (
     <div className="w-full md:w-[280px] lg:w-[320px] h-full flex-shrink-0 flex flex-col bg-[#0F172A] md:border-r border-blue-700 shadow-md md:shadow-none">
       <div className="px-4 py-3 w-full flex justify-between items-center border-b border-blue-700/50 md:pt-4">
@@ -147,7 +201,7 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
         </button>
       </div>
 
-      {isLoading && (
+      {isLoading ? (
         <div className="flex-grow flex items-center justify-center text-blue-400 mt-4">
           <svg
             className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-400"
@@ -171,24 +225,18 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
           </svg>
           Carregando...
         </div>
-      )}
-
-      {!isLoading && error && (
+      ) : error ? (
         <div className="flex-grow flex flex-col items-center justify-center text-red-400 p-4">
           <FiAlertCircle size={32} className="mb-2" />
           <p className="text-center">{error}</p>
         </div>
-      )}
-
-      {!isLoading && !error && chatList.length === 0 && (
+      ) : chatList.length === 0 ? (
         <div className="flex-grow flex items-center justify-center text-blue-500 p-4">
           <p className="text-center">
             Nenhuma conversa. <br /> Crie um grupo para começar!
           </p>
         </div>
-      )}
-
-      {!isLoading && !error && chatList.length > 0 && (
+      ) : (
         <div className="custom-scrollbar flex-grow h-full">
           <ul className="space-y-px p-2 flex flex-col gap-1">
             {chatList.map((chat) => (
@@ -255,12 +303,12 @@ export default function Grupos({ onChatSelect, activeChatId }: GruposProps) {
                     </button>
                     {menuOpen === chat.id && (
                       <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] border border-blue-700 rounded-md shadow-lg p-2 text-sm text-blue-100 z-30">
-                        <button className="w-full text-left hover:bg-blue-700/30 p-2 rounded cursor-pointer">
+                        <button
+                          onClick={handleAddMembers}
+                          className="w-full text-left hover:bg-blue-700/30 p-2 rounded cursor-pointer"
+                        >
                           Adicionar Contatos
                         </button>
-                        {/* <button className="w-full text-left hover:bg-blue-700/30 p-2 rounded cursor-pointer">
-                          Alterar Nome do Grupo
-                        </button> */}
                       </div>
                     )}
                   </div>
