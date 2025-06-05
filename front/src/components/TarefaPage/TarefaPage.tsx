@@ -1,8 +1,9 @@
 import React, { FC, useEffect, useState } from "react";
-import { TarefaService } from "../../services/api";
+import * as taskService from "../../services/taskService";
 import TarefaForm from "../TarefaForm/TarefaForm";
 import TarefaItem from "../TarefaItem/TarefaItem";
-import Tarefa from "../../types/Tarefa";
+import { Task as Tarefa } from "../../services/taskService";
+import { useAuth } from "../../context/authContext";
 
 interface TarefaPageProps {
   selectedDate: Date;
@@ -13,85 +14,93 @@ const TarefaPage: FC<TarefaPageProps> = ({ selectedDate, onClose }) => {
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [carregando, setCarregando] = useState<boolean>(true);
   const [erro, setErro] = useState<string | null>(null);
-
-  const carregarTarefas = async () => {
-    try {
-      setCarregando(true);
-      const tarefasCarregadas = await TarefaService.listarTarefas();
-      setTarefas(tarefasCarregadas);
-      setErro(null);
-    } catch (error) {
-      console.error("Erro ao carregar tarefas:", error);
-      setErro(
-        "Não foi possível carregar as tarefas. Tente novamente mais tarde."
-      );
-    } finally {
-      setCarregando(false);
-    }
-  };
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    carregarTarefas();
-  }, []);
+    if (!currentUser?.uid) {
+      setCarregando(false);
+      setTarefas([]);
+      return;
+    }
 
-  const handleTarefaAdicionada = () => {
-    carregarTarefas();
-  };
+    setErro(null);
 
-  const handleTarefaAtualizada = () => {
-    carregarTarefas();
+    const unsubscribe = taskService.listenToUserTasks(
+      currentUser.uid,
+      selectedDate,
+      (tarefasCarregadas) => {
+        setTarefas(tarefasCarregadas);
+      },
+      (error) => {
+        console.error("Erro ao carregar tarefas:", error);
+        setErro(error.message || "Não foi possível carregar as tarefas.");
+        setCarregando(false);
+      },
+      (loadingState) => {
+        setCarregando(loadingState);
+      }
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [currentUser?.uid, selectedDate]);
+
+  const handleTarefaAdicionadaOuAtualizada = () => {
+    console.log("Tarefa foi adicionada/atualizada. O listener deve atualizar a lista.");
   };
 
   return (
-    <div
-      className="h-full w-full overflow-y-auto custom-scrollbar pr-2"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-blue-400">
-          Tarefas para {selectedDate.toLocaleDateString("pt-BR")}
+    <div className="h-full w-full overflow-y-auto custom-scrollbar pr-2">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-semibold text-blue-300">
+          Tarefas para {selectedDate.toLocaleDateString("pt-BR", { weekday: 'long', day: 'numeric', month: 'long' })}
         </h1>
         <button
           onClick={onClose}
-          className="text-blue-200 hover:text-blue-400 transition-colors cursor-pointer"
+          className="text-blue-400 hover:text-blue-200 transition-colors p-1 rounded-full hover:bg-slate-700"
+          title="Fechar"
         >
           ✕
         </button>
       </div>
 
-      {/* Formulário de tarefa */}
-      <div className="bg-[#1E293B] border border-blue-800 rounded-xl shadow-lg p-4 mb-4">
-        <h2 className="text-lg font-semibold mb-3 text-[#F8FAFC]">
+      <div className="bg-[#172033] border border-blue-700/50 rounded-xl shadow-lg p-4 mb-6">
+        <h2 className="text-lg font-medium mb-3 text-slate-100">
           Adicionar Nova Tarefa
         </h2>
-        <TarefaForm onTarefaAdicionada={handleTarefaAdicionada} />
+        <TarefaForm 
+            onTarefaAdicionada={handleTarefaAdicionadaOuAtualizada} 
+            selectedDate={selectedDate}
+        />
       </div>
 
-      {/* Lista de tarefas */}
-      <div className="bg-[#1E293B] border border-blue-800 rounded-xl shadow-lg p-4">
-        <h2 className="text-lg font-semibold mb-3 text-[#F8FAFC]">
-          Minhas Tarefas
+      <div className="bg-[#172033] border border-blue-700/50 rounded-xl shadow-lg p-4">
+        <h2 className="text-lg font-medium mb-3 text-slate-100">
+          Minhas Tarefas ({tarefas.length})
         </h2>
-
-        {carregando ? (
-          <div className="text-center py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-400"></div>
-            <p className="mt-2 text-blue-300">Carregando tarefas...</p>
+        {carregando && tarefas.length === 0 ? (
+          <div className="text-center py-4 text-blue-400">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-400 mb-2"></div>
+            <p>Carregando tarefas...</p>
           </div>
         ) : erro ? (
-          <div className="bg-red-900/30 border border-red-700 text-red-400 px-3 py-2 rounded-lg">
+          <div className="bg-red-900/30 border border-red-700 text-red-300 px-3 py-2 rounded-lg text-sm">
             {erro}
           </div>
         ) : tarefas.length === 0 ? (
           <div className="text-center py-4 text-blue-400">
-            <p>Nenhuma tarefa encontrada. Adicione uma nova tarefa acima.</p>
+            <p>Nenhuma tarefa encontrada para esta data.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {tarefas.map((tarefa) => (
               <TarefaItem
                 key={tarefa.id}
                 tarefa={tarefa}
-                onTarefaAtualizada={handleTarefaAtualizada}
+                onTarefaAtualizada={handleTarefaAdicionadaOuAtualizada}
               />
             ))}
           </div>
