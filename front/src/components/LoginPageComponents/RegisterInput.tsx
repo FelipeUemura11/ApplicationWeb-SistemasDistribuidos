@@ -13,7 +13,7 @@ export default function RegisterInput({ value, onChange }: RegisterInputProps) {
     <div className="relative w-full">
       <label
         htmlFor="nomeCompleto"
-        className={`absolute text-gray-300 transition-all duration-300 bg-[#0F172A] px-2 ${
+        className={`absolute text-gray-300 transition-all duration-300 bg-[#1E293B] md:bg-[#0F172A] px-2 ${
           isFocused || value
             ? "top-[-10px] left-2 text-[14px]"
             : "top-1/2 transform left-3 -translate-y-1/2 text-base text-[16px]"

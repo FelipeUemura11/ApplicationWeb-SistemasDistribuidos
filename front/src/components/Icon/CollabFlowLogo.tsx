@@ -2,7 +2,7 @@ const CollabFlowLogo = () => {
   return (
     <>
       <svg
-        className="h-20 hover:scale-105 transition-transform duration-300 cursor-pointer"
+        className="h-20 max-w-[250px] md:max-w-[500px] hover:scale-105 transition-transform duration-300 cursor-pointer"
         viewBox="0 0 400 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

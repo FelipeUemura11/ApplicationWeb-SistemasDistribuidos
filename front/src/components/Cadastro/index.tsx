@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
@@ -13,7 +13,6 @@ import Divider from "../LoginPageComponents/Divider";
 import LoginInput from "../LoginPageComponents/LoginInput";
 import PasswordInput from "../LoginPageComponents/PasswordInput";
 import RegisterInput from "../LoginPageComponents/RegisterInput";
-import BackgroundImage from "../../assets/images/loginPage.jpg";
 
 export default function Cadastro({
   setIsLogin,
@@ -24,24 +23,10 @@ export default function Cadastro({
 }) {
   const navigate = useNavigate();
   const { signUp, updateUserProfile } = useAuth();
-  const [bgImage, setBgImage] = useState(BackgroundImage);
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setBgImage("");
-      } else {
-        setBgImage(BackgroundImage);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   async function cadastrarUsuario(e: React.FormEvent) {
     e.preventDefault();
@@ -154,7 +139,6 @@ export default function Cadastro({
       style={{
         scrollbarWidth: "none",
         msOverflowStyle: "none",
-        backgroundImage: bgImage ? `url(${bgImage})` : "none",
       }}
     >
       <style>
@@ -164,7 +148,7 @@ export default function Cadastro({
       }
     `}
       </style>
-      <div className="w-[95%] md:w-[70%] rounded-lg bg-[#0F172A] h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
+      <div className="w-[95%] md:w-[70%] rounded-lg bg-[#1E293B] h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
         <h1 className="text-center text-gray-300 text-[30px] font-medium mb-[10px] pt-6">
           Cadastro
         </h1>

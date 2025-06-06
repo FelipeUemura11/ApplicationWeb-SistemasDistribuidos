@@ -108,9 +108,9 @@ export default function AccountHeader({ currentUser, setShowModal }: Props) {
 
       {/* Ações */}
       <div className="flex flex-col gap-4 mb-8">
-        <button className="flex items-center justify-center cursor-pointer gap-2 bg-[#3B82F6] hover:bg-[#1E40AF] text-white font-medium py-2 px-4 rounded-lg transition-all">
+        {/* <button className="flex items-center justify-center cursor-pointer gap-2 bg-[#3B82F6] hover:bg-[#1E40AF] text-white font-medium py-2 px-4 rounded-lg transition-all">
           <FaEdit /> Editar Perfil
-        </button>
+        </button> */}
 
         <button
           onClick={() => setShowModal(true)}

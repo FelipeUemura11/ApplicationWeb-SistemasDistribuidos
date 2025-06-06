@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
@@ -12,7 +12,6 @@ import { upsertUserInDatabase } from "../../services/userService";
 import Divider from "../LoginPageComponents/Divider";
 import LoginInput from "../LoginPageComponents/LoginInput";
 import PasswordInput from "../LoginPageComponents/PasswordInput";
-import BackgroundImage from "../../assets/images/loginPage.jpg";
 
 export default function Login({
   setIsLogin,
@@ -23,22 +22,8 @@ export default function Login({
 }) {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const [bgImage, setBgImage] = useState(BackgroundImage);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setBgImage("");
-      } else {
-        setBgImage(BackgroundImage);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   async function loginUsuario(e: React.FormEvent) {
     e.preventDefault();
@@ -123,12 +108,11 @@ export default function Login({
       id="formulario"
       className="min-h-screen h-[100%] overflow-y-auto scrollbar-hide w-[100%] pt-6"
       style={{
-        backgroundImage: bgImage ? `url(${bgImage})` : "none",
         scrollbarWidth: "none",
         msOverflowStyle: "none",
       }}
     >
-      <div className="w-[95%] md:w-[70%] bg-[#0F172A]  rounded-lg h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
+      <div className="w-[95%] md:w-[70%] bg-[#1E293B]  rounded-lg h-fit md:bg-transparent p-[20px] md:p-0 mx-auto flex flex-col transition-opacity duration-500 mt-[110px] mb-[20px]">
         <h1 className="text-center text-[30px] font-medium mb-[10px] text-gray-300">
           Login
         </h1>
