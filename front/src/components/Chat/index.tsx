@@ -83,19 +83,39 @@ export default function Chat({ chatId }: ChatProps) {
 
           const spacingClass = isDifferentSender ? "mt-4" : "mt-2";
 
+          const formatarHorario = (timestamp: number | any): string => {
+            if (!timestamp) return "";
+
+            let date;
+            if (typeof timestamp === "object" && timestamp.seconds) {
+              date = new Date(timestamp.seconds * 1000);
+            } else {
+              date = new Date(timestamp);
+            }
+
+            return date.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          };
+
           return (
             <div key={msg.id} className={`flex gap-2 ${spacingClass}`}>
               <div
-                className={`px-4 py-2 rounded-lg max-w-xs ${
-                  msg.senderId === currentUser?.uid
+                className={`px-4 py-2 rounded-lg max-w-xs ${msg.senderId === currentUser?.uid
                     ? "bg-blue-600 text-white ml-auto"
                     : "bg-blue-800 text-blue-100 mr-auto"
-                }`}
+                  }`}
               >
                 {msg.senderId !== currentUser?.uid && msg.senderName && (
                   <p className="text-xs text-blue-300 mb-1">{msg.senderName}</p>
                 )}
-                {msg.text}
+
+                {/* Mensagem e horário */}
+                <p>{msg.text}</p>
+                <p className="text-xs text-blue-300 mt-1 text-right">
+                  {formatarHorario(msg.timestamp)}
+                </p>
               </div>
             </div>
           );
