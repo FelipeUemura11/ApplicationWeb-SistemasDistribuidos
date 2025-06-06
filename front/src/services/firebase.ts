@@ -3,13 +3,13 @@ import { initializeApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getDatabase, Database } from "firebase/database"; 
 const firebaseConfig = {
-  apiKey: "AIzaSyCzlKreJKlwuo31l99gOt979EP1Uwp7qcg",
-  authDomain: "collabflow-59ecb.firebaseapp.com",
-  projectId: "collabflow-59ecb",
-  storageBucket: "collabflow-59ecb.firebasestorage.app",
-  messagingSenderId: "7880766708",
-  appId: "1:7880766708:web:0f8e0dc6a3cebc91565aa1",
-  measurementId: "G-1VS9H2S3W5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
